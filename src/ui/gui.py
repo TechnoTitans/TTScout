@@ -27,7 +27,7 @@ class CameraApp:
         self.snapshot_button = tk.Button(self.window, text="Take Snapshot", command=self.take_snapshot)
         self.snapshot_button.pack(side=tk.BOTTOM, padx=10, pady=10)
 
-        self.cap = get_capture_device(12)
+        self.cap = get_capture_device(0)
         if self.cap is None:
             exit(1)
 
