@@ -1,7 +1,17 @@
-from cv2 import cv2
+import cv2
+import warnings
 import tkinter as tk
 from PIL import Image, ImageTk
 from pupil_apriltags import Detector
+
+
+def get_capture_device(source):
+    device = cv2.VideoCapture(source)
+    if device is None or not device.isOpened():
+        warnings.warn(f"Unable to open VideoCapture Stream on Source: {source}")
+        return None
+
+    return device
 
 
 class CameraApp:
@@ -12,10 +22,14 @@ class CameraApp:
         self.video_frame = tk.Frame(self.window)
         self.video_frame.pack(side=tk.TOP, padx=10, pady=10)
 
+        self.snapshot_frame = None
+
         self.snapshot_button = tk.Button(self.window, text="Take Snapshot", command=self.take_snapshot)
         self.snapshot_button.pack(side=tk.BOTTOM, padx=10, pady=10)
 
-        self.cap = cv2.VideoCapture(0)
+        self.cap = get_capture_device(12)
+        if self.cap is None:
+            exit(1)
 
         self.video_stream = tk.Label(self.video_frame)
         self.video_stream.pack()
@@ -99,7 +113,7 @@ class CameraApp:
         self.window.destroy()
 
 
-window = tk.Tk()
-app = CameraApp(window)
+tkWindow = tk.Tk()
+app = CameraApp(tkWindow)
 app.update_stream()
-window.mainloop()
+tkWindow.mainloop()
