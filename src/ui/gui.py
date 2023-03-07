@@ -1,4 +1,4 @@
-import cv2
+from cv2 import cv2
 import tkinter as tk
 from PIL import Image, ImageTk
 
@@ -9,18 +9,15 @@ class CameraApp:
         self.window.title("TTScout")
         self.window.resizable(width=False, height=False)
 
+        self.snapshot_frame = None
+
         self.video_frame = tk.Frame(self.window)
         self.video_frame.pack(side=tk.TOP, padx=10, pady=10)
 
         self.snapshot_button = tk.Button(self.window, text="Take Snapshot", command=self.take_snapshot)
         self.snapshot_button.pack(side=tk.BOTTOM, padx=10, pady=10)
 
-        try:
-            self.cap = cv2.VideoCapture(0)
-        except:
-            print("Failed to find camera feed.")
-            exit(1)
-
+        self.cap = cv2.VideoCapture(0)
         self.video_stream = tk.Label(self.video_frame)
         self.video_stream.pack()
 
