@@ -1,15 +1,13 @@
 from cv2 import cv2
 import tkinter as tk
 from PIL import Image, ImageTk
+from pupil_apriltags import Detector
 
 
 class CameraApp:
     def __init__(self, window):
         self.window = window
-        self.window.title("TTScout")
-        self.window.resizable(width=False, height=False)
-
-        self.snapshot_frame = None
+        self.window.title("Camera App")
 
         self.video_frame = tk.Frame(self.window)
         self.video_frame.pack(side=tk.TOP, padx=10, pady=10)
@@ -18,20 +16,40 @@ class CameraApp:
         self.snapshot_button.pack(side=tk.BOTTOM, padx=10, pady=10)
 
         self.cap = cv2.VideoCapture(0)
+
         self.video_stream = tk.Label(self.video_frame)
         self.video_stream.pack()
 
         self.preview_window = tk.Toplevel(self.window)
-        self.preview_window.resizable(width=False, height=False)
         self.preview_window.withdraw()
+
+        self.detector = Detector(
+            families='tag16h5',
+            nthreads=1,
+            quad_decimate=10,
+            quad_sigma=1,
+            refine_edges=1,
+            decode_sharpening=0.35,
+            debug=0
+        )
 
     def update_stream(self):
         ret, frame = self.cap.read()
 
         if ret:
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            image = Image.fromarray(image)
 
+            # Detect AprilTags in the frame
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            tags = self.detector.detect(gray)
+
+            # Draw AprilTag outlines on the frame
+            for tag in tags:
+                pts = tag.corners.astype(int)
+                print(tag.tag_id)
+                cv2.polylines(image, [pts], True, (0, 255, 0), 2)
+
+            image = Image.fromarray(image)
             image = image.resize((640, 480), Image.LANCZOS)
 
             photo = ImageTk.PhotoImage(image)
@@ -53,8 +71,6 @@ class CameraApp:
             self.show_preview()
 
     def show_preview(self):
-        self.preview_window.title("Preview")
-
         image = Image.fromarray(self.snapshot_frame)
         image = image.resize((320, 240), Image.LANCZOS)
 
@@ -73,7 +89,6 @@ class CameraApp:
 
     def close_preview(self):
         self.preview_window.withdraw()
-        self.snapshot_frame = None
 
     def retry_preview(self):
         self.preview_window.withdraw()
