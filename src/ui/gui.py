@@ -72,6 +72,9 @@ class CameraApp:
             cv2.circle(image, center, 5, (0, 0, 255), -1)
 
             # Calculate the rotation matrix
+
+            #TODO Karthik i got this working on hopes and dreams could u make it use a dictionary so that we dont need this
+            # stupid if statement thing.
             x1, y1, x6, y6 = 0, 0, 0, 0
             for tag in tags:
                 if tag.tag_id == 1:
