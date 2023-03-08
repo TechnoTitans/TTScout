@@ -43,7 +43,7 @@ class CameraApp:
             nthreads=1,
             quad_decimate=1,
             quad_sigma=1,
-            refine_edges=5,
+            refine_edges=10,
             decode_sharpening=0.25,
             debug=0
         )
@@ -54,23 +54,18 @@ class CameraApp:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         tags = self.detector.detect(gray)
 
-        tag_pts = []
+        tag_pts = [tag.center.astype(int) for tag in tags if tag.tag_id in possible_tags]
         for tag in tags:
             if tag.tag_id not in possible_tags and tag.tag_id != 0:
                 break
             pts = tag.corners.astype(int)
-            if tag.tag_id in possible_tags:
-                tag_pts.append(tag.center.astype(int))
             cv2.polylines(image, [pts], True, (0, 255, 0), 2)
 
         if len(tag_pts) >= 4:
             # Find the top-left and bottom-right corners of the box
-            x_vals = [pt[0] for pt in tag_pts]
-            y_vals = [pt[1] for pt in tag_pts]
-            x_min = min(x_vals)
-            y_min = min(y_vals)
-            x_max = max(x_vals)
-            y_max = max(y_vals)
+            x_vals, y_vals = zip(*tag_pts)
+            x_min, y_min = np.min(x_vals), np.min(y_vals)
+            x_max, y_max = np.max(x_vals), np.max(y_vals)
 
             # Draw the box with the centers of the tags
             center = (int((x_min + x_max) / 2), int((y_min + y_max) / 2))
@@ -87,11 +82,11 @@ class CameraApp:
             rot_mat = cv2.getRotationMatrix2D(center, rot, 1.0)
 
             # Transform the corners of the box
-            corners = np.array([[x_min, y_min], [x_max, y_min], [x_max, y_max], [x_min, y_max]], dtype=np.float32)
-            rotated_corners = cv2.transform(np.array([corners]), rot_mat)[0].astype(np.int32)
+            corners = [[x_min, y_min], [x_max, y_min], [x_max, y_max], [x_min, y_max]]
+            rotated_corners = cv2.transform(np.array([corners], dtype=np.float32), rot_mat)[0].astype(np.int32)
 
             # Draw the rotated rectangle
-            cv2.polylines(image, [rotated_corners], True, (0, 255, 0), 2)
+            cv2.drawContours(image, [rotated_corners], -1, (0, 255, 0), 2)
 
     def update_stream(self):
         ret, frame = self.cap.read()
