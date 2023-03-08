@@ -56,10 +56,9 @@ class CameraApp:
 
         tag_pts = [tag.center.astype(int) for tag in tags if tag.tag_id in possible_tags]
         for tag in tags:
-            if tag.tag_id not in possible_tags and tag.tag_id != 0:
-                break
-            pts = tag.corners.astype(int)
-            cv2.polylines(image, [pts], True, (0, 255, 0), 2)
+            if tag.tag_id in possible_tags or tag.tag_id == 0:
+                pts = tag.corners.astype(int)
+                cv2.polylines(image, [pts], True, (0, 255, 0), 2)
 
         if len(tag_pts) >= 4:
             # Find the top-left and bottom-right corners of the box
@@ -73,8 +72,8 @@ class CameraApp:
 
             # Calculate the rotation matrix
 
-            #TODO Karthik i got this working on hopes and dreams could u make it use a dictionary so that we dont need this
-            # stupid if statement thing.
+            # TODO Karthik i got this working on hopes and dreams could u make it use a dictionary so that we dont
+            #  need this stupid if statement thing.
             x1, y1, x6, y6 = 0, 0, 0, 0
             for tag in tags:
                 if tag.tag_id == 1:
@@ -119,24 +118,17 @@ class CameraApp:
         if ret:
             self.snapshot_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             self.clear_preview()
-            self.show_preview()
+            if self.snapshot_frame is not None:
+                self.show_preview()
 
     def show_preview(self):
         image = Image.fromarray(self.snapshot_frame)
         image = image.resize((320, 240), Image.LANCZOS)
-
-        tags = self.detector.detect(image)
-
-        # Draw AprilTag outlines on the frame
-        for tag in tags:
-            pts = tag.corners.astype(int)
-            print(tag.tag_id)
-            cv2.polylines(image, [pts], True, (0, 255, 0), 2)
-
         photo = ImageTk.PhotoImage(image)
 
         self.preview_window.deiconify()
         preview_label = tk.Label(self.preview_window, image=photo)
+        preview_label.image = photo  # Keep reference to avoid garbage collection
         preview_label.pack()
 
         confirm_button = tk.Button(self.preview_window, text="Confirm", command=self.confirm_preview)
@@ -147,6 +139,7 @@ class CameraApp:
 
     def confirm_preview(self):
         self.preview_window.withdraw()
+        #TODO save to csv
 
     def retry_preview(self):
         self.preview_window.withdraw()
@@ -157,7 +150,7 @@ class CameraApp:
         self.window.destroy()
 
 
-window = tk.Tk()
-app = CameraApp(window)
+tk_window = tk.Tk()
+app = CameraApp(tk_window)
 app.update_stream()
-window.mainloop()
+tk_window.mainloop()
