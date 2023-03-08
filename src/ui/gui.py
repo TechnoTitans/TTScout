@@ -50,10 +50,10 @@ class CameraApp:
 
     def define_edges(self, image):
         possible_tags = (1, 6, 8, 3)
+
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         tags = self.detector.detect(gray)
 
-        # Draw AprilTag outlines on the frame
         tag_pts = []
         for tag in tags:
             if tag.tag_id not in possible_tags and tag.tag_id != 0:
@@ -73,31 +73,22 @@ class CameraApp:
             y_max = max(y_vals)
 
             # Draw the box with the centers of the tags
-            # center = ((x_min + x_max) // 2, (y_min + y_max) // 2)
             center = (int((x_min + x_max) / 2), int((y_min + y_max) / 2))
-            # cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
             cv2.circle(image, center, 5, (0, 0, 255), -1)
 
-            x1 = 0
-            y1 = 0
-            x6 = 0
-            y6 = 0
-
-            for tagPts in tags:
-                if tagPts.tag_id == 1:
-                    x1 = tagPts.center[0].astype(int)
-                    y1 = tagPts.center[1].astype(int)
-                elif tagPts.tag_id == 6:
-                    x6 = tagPts.center[0].astype(int)
-                    y6 = tagPts.center[1].astype(int)
-
+            # Calculate the rotation matrix
+            x1, y1, x6, y6 = 0, 0, 0, 0
+            for tag in tags:
+                if tag.tag_id == 1:
+                    x1, y1 = tag.center.astype(int)
+                elif tag.tag_id == 6:
+                    x6, y6 = tag.center.astype(int)
             rot = -np.rad2deg(np.arctan2((y6 - y1), (x6 - x1)))
             rot_mat = cv2.getRotationMatrix2D(center, rot, 1.0)
-            corners = np.array([[x_min, y_min], [x_max, y_min], [x_max, y_max], [x_min, y_max]])
-            corners = corners.reshape((-1, 1, 2))
-            rotated_corners = cv2.transform(corners, rot_mat)
-            rotated_corners = rotated_corners.reshape((4, 2))
-            rotated_corners = np.intp(rotated_corners)
+
+            # Transform the corners of the box
+            corners = np.array([[x_min, y_min], [x_max, y_min], [x_max, y_max], [x_min, y_max]], dtype=np.float32)
+            rotated_corners = cv2.transform(np.array([corners]), rot_mat)[0].astype(np.int32)
 
             # Draw the rotated rectangle
             cv2.polylines(image, [rotated_corners], True, (0, 255, 0), 2)
