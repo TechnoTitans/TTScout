@@ -122,6 +122,7 @@ class CameraApp:
                 self.show_preview()
 
     def show_preview(self):
+        self.define_edges(self.snapshot_frame)
         image = Image.fromarray(self.snapshot_frame)
         image = image.resize((320, 240), Image.LANCZOS)
         photo = ImageTk.PhotoImage(image)
