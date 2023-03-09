@@ -1,6 +1,9 @@
-import cv2
 import warnings
+
+import cv2
 import tkinter as tk
+
+import numpy as np
 from PIL import Image, ImageTk
 from pupil_apriltags import Detector
 
@@ -17,12 +20,10 @@ def get_capture_device(source):
 class CameraApp:
     def __init__(self, window):
         self.window = window
-        self.window.title("Camera App")
+        self.window.title("TTScout")
 
         self.video_frame = tk.Frame(self.window)
         self.video_frame.pack(side=tk.TOP, padx=10, pady=10)
-
-        self.snapshot_frame = None
 
         self.snapshot_button = tk.Button(self.window, text="Take Snapshot", command=self.take_snapshot)
         self.snapshot_button.pack(side=tk.BOTTOM, padx=10, pady=10)
@@ -40,12 +41,54 @@ class CameraApp:
         self.detector = Detector(
             families='tag16h5',
             nthreads=1,
-            quad_decimate=10,
+            quad_decimate=1,
             quad_sigma=1,
-            refine_edges=1,
-            decode_sharpening=0.35,
+            refine_edges=10,
+            decode_sharpening=0.25,
             debug=0
         )
+
+    def define_edges(self, image):
+        possible_tags = (1, 6, 8, 3)
+
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        tags = self.detector.detect(gray)
+
+        tag_pts = [tag.center.astype(int) for tag in tags if tag.tag_id in possible_tags]
+        for tag in tags:
+            if tag.tag_id in possible_tags or tag.tag_id == 0:
+                pts = tag.corners.astype(int)
+                cv2.polylines(image, [pts], True, (0, 255, 0), 2)
+
+        if len(tag_pts) >= 4:
+            # Find the top-left and bottom-right corners of the box
+            x_vals, y_vals = zip(*tag_pts)
+            x_min, y_min = np.min(x_vals), np.min(y_vals)
+            x_max, y_max = np.max(x_vals), np.max(y_vals)
+
+            # Draw the box with the centers of the tags
+            center = (int((x_min + x_max) / 2), int((y_min + y_max) / 2))
+            cv2.circle(image, center, 5, (0, 0, 255), -1)
+
+            # Calculate the rotation matrix
+
+            # TODO Karthik i got this working on hopes and dreams could u make it use a dictionary so that we dont
+            #  need this stupid if statement thing.
+            x1, y1, x6, y6 = 0, 0, 0, 0
+            for tag in tags:
+                if tag.tag_id == 1:
+                    x1, y1 = tag.center.astype(int)
+                elif tag.tag_id == 6:
+                    x6, y6 = tag.center.astype(int)
+            rot = -np.rad2deg(np.arctan2((y6 - y1), (x6 - x1)))
+            rot_mat = cv2.getRotationMatrix2D(center, rot, 1.0)
+
+            # Transform the corners of the box
+            corners = [[x_min, y_min], [x_max, y_min], [x_max, y_max], [x_min, y_max]]
+            rotated_corners = cv2.transform(np.array([corners], dtype=np.float32), rot_mat)[0].astype(np.int32)
+
+            # Draw the rotated rectangle
+            cv2.drawContours(image, [rotated_corners], -1, (0, 255, 0), 2)
 
     def update_stream(self):
         ret, frame = self.cap.read()
@@ -54,14 +97,7 @@ class CameraApp:
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             # Detect AprilTags in the frame
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            tags = self.detector.detect(gray)
-
-            # Draw AprilTag outlines on the frame
-            for tag in tags:
-                pts = tag.corners.astype(int)
-                print(tag.tag_id)
-                cv2.polylines(image, [pts], True, (0, 255, 0), 2)
+            self.define_edges(image)
 
             image = Image.fromarray(image)
             image = image.resize((640, 480), Image.LANCZOS)
@@ -82,27 +118,29 @@ class CameraApp:
         if ret:
             self.snapshot_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             self.clear_preview()
-            self.show_preview()
+            if self.snapshot_frame is not None:
+                self.show_preview()
 
     def show_preview(self):
+        self.define_edges(self.snapshot_frame)
         image = Image.fromarray(self.snapshot_frame)
         image = image.resize((320, 240), Image.LANCZOS)
-
         photo = ImageTk.PhotoImage(image)
 
         self.preview_window.deiconify()
         preview_label = tk.Label(self.preview_window, image=photo)
-        preview_label.image = photo
+        preview_label.image = photo  # Keep reference to avoid garbage collection
         preview_label.pack()
 
-        confirm_button = tk.Button(self.preview_window, text="Confirm", command=self.close_preview)
+        confirm_button = tk.Button(self.preview_window, text="Confirm", command=self.confirm_preview)
         confirm_button.pack(side=tk.LEFT)
 
         retry_button = tk.Button(self.preview_window, text="Retry", command=self.retry_preview)
         retry_button.pack(side=tk.RIGHT)
 
-    def close_preview(self):
+    def confirm_preview(self):
         self.preview_window.withdraw()
+        #TODO save to csv
 
     def retry_preview(self):
         self.preview_window.withdraw()
@@ -113,7 +151,7 @@ class CameraApp:
         self.window.destroy()
 
 
-tkWindow = tk.Tk()
-app = CameraApp(tkWindow)
+tk_window = tk.Tk()
+app = CameraApp(tk_window)
 app.update_stream()
-tkWindow.mainloop()
+tk_window.mainloop()
