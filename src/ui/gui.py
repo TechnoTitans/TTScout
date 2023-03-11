@@ -11,6 +11,8 @@ import pupil_apriltags
 from PIL import Image, ImageTk
 from pupil_apriltags import Detector
 
+from util import four_point_transform
+
 
 def get_capture_device(source):
     device = cv2.VideoCapture(source)
@@ -221,8 +223,15 @@ class CameraApp:
                     polygon = approx_polygon
                     break
 
-        if polygon is None:
-            pass
+            if polygon is None:
+                return
+
+            raw_transform = four_point_transform(image, polygon.reshape(4, 2))
+            print([cv2.contourArea(c) for c in sorted_contours])
+
+            self.img_window(Image.fromarray(edged))
+            self.img_window(Image.fromarray(cv2.drawContours(image, contours, -1, Color.GREEN.rgb, 3)))
+            self.img_window(Image.fromarray(raw_transform))
 
     def update_stream(self):
         ret, frame = self.cap.read()
@@ -253,7 +262,8 @@ class CameraApp:
             self.snapshot_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             self.clear_preview()
             if self.snapshot_frame is not None:
-                self.show_preview()
+                # self.show_preview()
+                self.contour_edges(self.snapshot_frame)
 
     def show_preview(self):
         self.define_edges(self.snapshot_frame)
