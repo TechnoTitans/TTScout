@@ -194,7 +194,33 @@ class CameraApp:
         blurred = cv2.GaussianBlur(grayscale, (5, 5), 0)
         edged = cv2.Canny(blurred, 75, 200)
 
-        self.img_window(edged)
+        # find contours using edge biased image from canny, RETR_EXTERNAL for only outer hierarchical contours
+        # CHAIN_APPROX_SIMPLE as we expect a paper to be constructed of lines, so we only need to store the 2 points
+        # on the extremes of the line contour
+
+        # see https://docs.opencv.org/4.7.0/d4/d73/tutorial_py_contours_begin.html
+        # and https://docs.opencv.org/4.7.0/d9/d8b/tutorial_py_contours_hierarchy.html
+        contours, _ = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        polygon = None
+        if len(contours) > 0:
+            # sort from greatest to the least contour area (our paper should be the biggest contour in image)
+            sorted_contours = sorted(contours, key=cv2.contourArea, reverse=True)
+            for contour in sorted_contours:
+                # find perimeter of contour
+                contour_perimeter = cv2.arcLength(contour, True)
+                # simplify the contour down to polygonal curves, using epsilon as 0.02 * perimeter
+                # see https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html#ga0012a5fdaea70b8a9970165d98722b4c
+                # and https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
+                approx_polygon = cv2.approxPolyDP(contour, 0.02 * contour_perimeter, True)
+
+                # rects have 4 vertices so if this has 4 points/vertices then we assume we found paper
+                if len(approx_polygon) == 4:
+                    polygon = approx_polygon
+                    break
+
+        if polygon is None:
+            pass
 
     def update_stream(self):
         ret, frame = self.cap.read()
