@@ -110,6 +110,15 @@ class CameraApp:
             debug=0
         )
 
+    def img_window(self, image, dims=(320, 240)):
+        image = image.resize(dims, Image.LANCZOS)
+        photo = ImageTk.PhotoImage(image)
+
+        self.preview_window.deiconify()
+        preview_label = tk.Label(self.preview_window, image=photo)
+        preview_label.image = photo  # Keep reference to avoid garbage collection
+        preview_label.pack()
+
     def get_tag_at_pos(self, tags: [pupil_apriltags.Detection], position: Position) -> pupil_apriltags.Detection | None:
         i, j = self.pos_indexes[position]
         tag_id = self.tag_layout[i][j]
@@ -180,6 +189,13 @@ class CameraApp:
             # Draw the rotated rectangle
             cv2.drawContours(image, [rotated_corners], -1, Color.GREEN.rgb, 2)
 
+    def contour_edges(self, image):
+        grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(grayscale, (5, 5), 0)
+        edged = cv2.Canny(blurred, 75, 200)
+
+        self.img_window(edged)
+
     def update_stream(self):
         ret, frame = self.cap.read()
 
@@ -214,13 +230,7 @@ class CameraApp:
     def show_preview(self):
         self.define_edges(self.snapshot_frame)
         image = Image.fromarray(self.snapshot_frame)
-        image = image.resize((320, 240), Image.LANCZOS)
-        photo = ImageTk.PhotoImage(image)
-
-        self.preview_window.deiconify()
-        preview_label = tk.Label(self.preview_window, image=photo)
-        preview_label.image = photo  # Keep reference to avoid garbage collection
-        preview_label.pack()
+        self.img_window(image, (320, 240))
 
         confirm_button = tk.Button(self.preview_window, text="Confirm", command=self.confirm_preview)
         confirm_button.pack(side=tk.LEFT)
