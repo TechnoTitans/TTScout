@@ -114,14 +114,35 @@ class CameraApp:
             debug=0
         )
 
-    def img_window(self, image, dims=(320, 240)):
-        image = image.resize(dims, Image.LANCZOS)
-        photo = ImageTk.PhotoImage(image)
+    def img_window(self, images, dims=(320, 240)):
+        self.preview_window.protocol("WM_DELETE_WINDOW", self.disable_event)
 
-        self.preview_window.deiconify()
-        preview_label = tk.Label(self.preview_window, image=photo)
-        preview_label.image = photo  # Keep reference to avoid garbage collection
-        preview_label.pack()
+        # Create a list to store PhotoImage objects
+        photos = []
+
+        # Iterate through the images and create a PhotoImage object for each one
+        for img in images:
+            img = img.resize(dims, Image.LANCZOS)
+            photo = ImageTk.PhotoImage(img)
+            photos.append(photo)
+
+        # Display the images in a vertical stack
+        if self.preview_window.winfo_exists():
+            self.preview_window.deiconify()
+
+        preview_frame = tk.Frame(self.preview_window)
+        preview_frame.pack(side=tk.TOP, padx=10, pady=10)
+
+        for photo in photos:
+            preview_label = tk.Label(preview_frame, image=photo)
+            preview_label.image = photo  # Keep reference to avoid garbage collection
+            preview_label.pack(side=tk.TOP)
+
+        confirm_button = tk.Button(self.preview_window, text="Confirm", command=self.confirm_preview)
+        confirm_button.pack(side=tk.LEFT)
+
+        retry_button = tk.Button(self.preview_window, text="Retry", command=self.retry_preview)
+        retry_button.pack(side=tk.RIGHT)
 
     def get_tag_at_pos(self, tags: [pupil_apriltags.Detection], position: Position) -> pupil_apriltags.Detection | None:
         i, j = self.pos_indexes[position]
@@ -229,9 +250,9 @@ class CameraApp:
             raw_transform = four_point_transform(image, polygon.reshape(4, 2))
             print([cv2.contourArea(c) for c in sorted_contours])
 
-            self.img_window(Image.fromarray(edged))
-            self.img_window(Image.fromarray(cv2.drawContours(image, contours, -1, Color.GREEN.rgb, 3)))
-            self.img_window(Image.fromarray(raw_transform))
+            self.img_window([Image.fromarray(edged),
+                             Image.fromarray(cv2.drawContours(image, contours, -1, Color.GREEN.rgb, 3)),
+                             Image.fromarray(raw_transform)])
 
     def update_stream(self):
         ret, frame = self.cap.read()
@@ -252,8 +273,9 @@ class CameraApp:
         self.video_stream.after(10, self.update_stream)
 
     def clear_preview(self):
-        for widget in self.preview_window.winfo_children():
-            widget.destroy()
+        if self.preview_window.winfo_exists():
+            for widget in self.preview_window.winfo_children():
+                widget.destroy()
 
     def take_snapshot(self):
         ret, frame = self.cap.read()
@@ -265,16 +287,8 @@ class CameraApp:
                 # self.show_preview()
                 self.contour_edges(self.snapshot_frame)
 
-    def show_preview(self):
-        self.define_edges(self.snapshot_frame)
-        image = Image.fromarray(self.snapshot_frame)
-        self.img_window(image, (320, 240))
-
-        confirm_button = tk.Button(self.preview_window, text="Confirm", command=self.confirm_preview)
-        confirm_button.pack(side=tk.LEFT)
-
-        retry_button = tk.Button(self.preview_window, text="Retry", command=self.retry_preview)
-        retry_button.pack(side=tk.RIGHT)
+    def disable_event(self):
+        pass
 
     def confirm_preview(self):
         self.preview_window.withdraw()
