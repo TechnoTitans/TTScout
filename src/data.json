@@ -4,10 +4,10 @@
         {
             "bubbles": [
                 {
-                    "bubble_bounding_box": null,
-                    "bubble_frame": null,
-                    "bubble_name": null,
-                    "is_tk": false,
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
                     "name": "bubble0",
                     "rect_h": 1,
                     "rect_w": 1,
@@ -16,10 +16,10 @@
                     "select_bubble_button": null
                 },
                 {
-                    "bubble_bounding_box": null,
-                    "bubble_frame": null,
-                    "bubble_name": null,
-                    "is_tk": false,
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
                     "name": "bubble1",
                     "rect_h": 1,
                     "rect_w": 1,
@@ -28,7 +28,48 @@
                     "select_bubble_button": null
                 }
             ],
-            "name": "why?"
+            "bubbles_frame": {},
+            "delete_button": {},
+            "delete_button_frame": {},
+            "is_tk": true,
+            "name": "why?",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 23,
+                    "rect_w": 28,
+                    "rect_x": 100,
+                    "rect_y": 126,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "DNA",
+                    "rect_h": 22,
+                    "rect_w": 26,
+                    "rect_x": 122,
+                    "rect_y": 127,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "delete_button": {},
+            "delete_button_frame": {},
+            "is_tk": true,
+            "name": "Mobility",
+            "question_frame": {},
+            "question_name": {}
         }
     ]
 }

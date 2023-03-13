@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import time
 from typing import Any, Callable, TextIO
 
 import math
@@ -6,6 +8,7 @@ import json
 import tkinter as tk
 import warnings
 import atexit
+import threading
 import enum
 
 import cv2
@@ -15,6 +18,7 @@ from PIL import Image, ImageTk
 from pupil_apriltags import Detector
 
 from util import four_point_transform, Color
+from scroll_frame import ScrollFrame
 from canvas import Canvas
 
 
@@ -415,13 +419,25 @@ class FormSetupApp(CameraApp):
                           bubble_frame: tk.Frame,
                           bubble_name: tk.Text,
                           bubble_bounding_box: tk.Text,
-                          select_bubble_button: tk.Button):
+                          select_bubble_button: tk.Button = None):
             self.is_tk = True
 
             self.bubble_frame = bubble_frame
             self.bubble_name = bubble_name
             self.bubble_bounding_box = bubble_bounding_box
             self.select_bubble_button = select_bubble_button
+
+        def delete_tk_widgets(self):
+            if not self.is_tk:
+                raise RuntimeError("IllegalState! Cannot invoke _delete_tk_widgets when not is_tk")
+
+            self.bubble_frame.destroy()
+            self.bubble_name.destroy()
+            self.bubble_bounding_box.destroy()
+
+            # special case where select_bubble_button isn't always a required widget to be displayed
+            if self.select_bubble_button is not None:
+                self.select_bubble_button.destroy()
 
         def update_bounding_box(self, bounding_box: (int, int, int, int)):
             if not self.is_tk:
@@ -438,20 +454,40 @@ class FormSetupApp(CameraApp):
             self.name = self.bubble_name.get("1.0", "1.end")
 
         @classmethod
-        def from_tk(cls, settings_frame: tk.Frame, selection_callback: str | Callable[[FormSetupApp.Bubble], Any]):
-            inst = cls("Enter Bubble Name Here...", 0, 0, 0, 0)
-
-            bubble_frame = tk.Frame(settings_frame)
+        def _make_tk_repr(cls, parent_frame: tk.Frame, name: str, bounding_box_str: str):
+            bubble_frame = tk.Frame(parent_frame)
             bubble_frame.pack(side=tk.TOP)
 
             bubble_name = tk.Text(bubble_frame, width=40, height=1)
-            bubble_name.insert("1.0", inst.name)
+            bubble_name.insert("1.0", name)
             bubble_name.pack(side=tk.TOP)
 
             bubble_bounding_box = tk.Text(bubble_frame, width=40, height=1)
-            bubble_bounding_box.insert("1.0", "Missing Bounding Box!")
+            bubble_bounding_box.insert("1.0", bounding_box_str)
             bubble_bounding_box["state"] = "disabled"
             bubble_bounding_box.pack(side=tk.TOP)
+
+            return bubble_frame, bubble_name, bubble_bounding_box
+
+        def tk_repr(self, container_frame: tk.Frame):
+            bubble_frame, bubble_name, bubble_bounding_box = FormSetupApp.Bubble._make_tk_repr(
+                container_frame,
+                self.name,
+                f"({self.rect_x}, {self.rect_y}, {self.rect_x + self.rect_w}, {self.rect_y + self.rect_h})"
+            )
+
+            # disable editing bubble name when making tk_repr instead of adding a new bubble
+            bubble_name["state"] = "disabled"
+
+            self._set_tk_props(bubble_frame, bubble_name, bubble_bounding_box)
+
+        @classmethod
+        def from_tk(cls, settings_frame: tk.Frame, selection_callback: str | Callable[[FormSetupApp.Bubble], Any]):
+            inst = cls("Enter Bubble Name Here...", 0, 0, 0, 0)
+
+            bubble_frame, bubble_name, bubble_bounding_box = cls._make_tk_repr(
+                settings_frame, inst.name, "Missing Bounding Box!"
+            )
 
             select_bubble_button = tk.Button(bubble_frame, text="Select", command=lambda: selection_callback(inst))
             select_bubble_button.pack(side=tk.RIGHT)
@@ -464,12 +500,92 @@ class FormSetupApp(CameraApp):
             return cls(**input_json)
 
     class Question(JsonSerializable):
-        def __init__(self, name, bubbles: [FormSetupApp.Bubble]):
+        def __init__(self, name, bubbles: [FormSetupApp.Bubble],
+                     is_tk: bool = False,
+                     question_frame: tk.Frame = None,
+                     question_name: tk.Text = None,
+                     bubbles_frame: tk.Frame = None,
+                     delete_button_frame: tk.Frame = None,
+                     delete_button: tk.Button = None):
             self.name = name
             self.bubbles = bubbles
 
+            self.is_tk: bool = is_tk
+            self.question_frame: tk.Frame | None = question_frame
+            self.question_name: tk.Text | None = question_name
+            self.bubbles_frame: tk.Frame | None = bubbles_frame
+            self.delete_button_frame: tk.Frame | None = delete_button_frame
+            self.delete_button: tk.Button | None = delete_button
+
         def __repr__(self):
             return f"Question(name={self.name}, bubbles={self.bubbles})"
+
+        def _set_tk_props(self,
+                          question_frame: tk.Frame,
+                          question_name: tk.Text,
+                          bubbles_frame: tk.Frame,
+                          delete_button_frame: tk.Frame,
+                          delete_button: tk.Button):
+            self.is_tk = True
+
+            self.question_frame = question_frame
+            self.question_name = question_name
+            self.bubbles_frame = bubbles_frame
+            self.delete_button_frame = delete_button_frame
+            self.delete_button = delete_button
+
+        def delete_tk_widgets(self):
+            if not self.is_tk:
+                raise RuntimeError("IllegalState! Cannot invoke _delete_tk_widgets when not is_tk")
+
+            for bubble in self.bubbles:
+                bubble.delete_tk_widgets()
+
+            self.question_frame.destroy()
+            self.question_name.destroy()
+            self.bubbles_frame.destroy()
+            self.delete_button_frame.destroy()
+            self.delete_button.destroy()
+
+        def _delete_question(self, name: str, deletion_callback: Callable[[str], Any]):
+            self.delete_tk_widgets()
+            deletion_callback(name)
+
+        @classmethod
+        def _make_tk_repr(cls,
+                          parent_frame: tk.Frame,
+                          name: str,
+                          bubbles: [FormSetupApp.Bubble]):
+            question_frame = tk.Frame(parent_frame)
+            question_frame.pack(side=tk.TOP)
+
+            question_name = tk.Text(question_frame, width=40, height=1)
+            question_name.insert("1.0", name)
+            question_name["state"] = "disabled"
+            question_name.pack(side=tk.TOP)
+
+            bubbles_frame = tk.Frame(question_frame)
+            bubbles_frame.pack(side=tk.RIGHT)
+
+            delete_button_frame = tk.Frame(question_frame)
+            delete_button_frame.pack(side=tk.LEFT)
+
+            for bubble in bubbles:
+                bubble.tk_repr(bubbles_frame)
+
+            return question_frame, question_name, bubbles_frame, delete_button_frame
+
+        def tk_repr(self, container_frame: tk.Frame, deletion_callback: str | Callable[[str], Any]):
+            question_frame, question_name, bubbles_frame, delete_button_frame = self._make_tk_repr(
+                container_frame, self.name, self.bubbles
+            )
+
+            delete_button = tk.Button(
+                delete_button_frame, text="Delete", command=lambda: self._delete_question(self.name, deletion_callback)
+            )
+            delete_button.pack(side=tk.RIGHT)
+
+            self._set_tk_props(question_frame, question_name, bubbles_frame, delete_button_frame, delete_button)
 
         @classmethod
         def from_json(cls, input_json: dict):
@@ -514,24 +630,41 @@ class FormSetupApp(CameraApp):
         self.canvas_container_window.withdraw()
 
         self.setup_canvas = Canvas(self.canvas_container_window)
+        self.canvas_preview_update = False  # continue updating while this is true, stop when false
+        self.canvas_preview_update_thread: threading.Thread | None = None
 
-        self.setup_image = None
-        self.settings_frame = None
+        self.setup_image: tk.Frame | None = None
+        self.settings_frame: tk.Frame | None = None
 
+        self.shown_questions_container: tk.Frame | None = None
+        self.shown_questions_scroll_frame: ScrollFrame | None = None
         self.curr_question_setting_bubbles = []
+
+    def display_question(self, question: Question):
+        if self.shown_questions_scroll_frame is not None:
+            question.tk_repr(self.shown_questions_scroll_frame.viewPort, lambda n: self.remove_question(n))
 
     def add_question(self, question: str, bubbles: [Bubble]):
         existing_question = self.get_question(question)
         if existing_question is None:
-            self.data.questions.append(FormSetupApp.Question(question, bubbles))
+            new_question = FormSetupApp.Question(question, bubbles)
+            self.data.questions.append(new_question)
+            self.display_question(new_question)
 
     def add_question_direct(self, question: Question):
         existing_question = self.get_question(question.name)
         if existing_question is None:
             self.data.questions.append(question)
+            self.display_question(question)
 
     def get_question(self, question_name: str) -> [Bubble]:
         return next((question for question in self.data.questions if question_name == question.name), None)
+
+    def remove_question(self, question_name: str):
+        existing_question = self.get_question(question_name)
+        if existing_question is not None:
+            self.data.questions.remove(existing_question)
+            # no need to do any removal of UI/Widgets here as the question should delete its own widgets
 
     def make_setup_window(self, setup_image: Image, dims=(240, 320)):
         self.setup_window.protocol("WM_DELETE_WINDOW", self.close_setup_window)
@@ -546,6 +679,15 @@ class FormSetupApp(CameraApp):
 
         setup_frame = tk.Frame(self.setup_window)
         setup_frame.pack(side=tk.TOP, padx=10, pady=10)
+
+        self.shown_questions_container = tk.Frame(setup_frame)
+        self.shown_questions_container.pack(side=tk.TOP)
+
+        self.shown_questions_scroll_frame = ScrollFrame(self.shown_questions_container)
+        self.shown_questions_scroll_frame.pack(side=tk.TOP, fill="both", expand=True)
+
+        for question in self.data.questions:
+            self.display_question(question)
 
         setup_label = tk.Label(setup_frame, image=photo)
         setup_label.image = photo  # Keep reference to avoid garbage collection
@@ -642,8 +784,29 @@ class FormSetupApp(CameraApp):
         # Create a PhotoImage object for the setup_image
         img = canvas_image.resize(dims, Image.LANCZOS)
         photo = ImageTk.PhotoImage(img)
-
         photo_width, photo_height = photo.width(), photo.height()
+
+        def crop(crop_img: Image, rect: (int, int, int, int), post_resize=(160, 160)):
+            return ImageTk.PhotoImage(crop_img.crop(rect).resize(post_resize, Image.LANCZOS))
+
+        preview_frame = tk.Frame(self.canvas_container_window)
+        preview_frame.pack(side=tk.TOP, padx=10, pady=10)
+
+        preview_label = tk.Label(preview_frame, image=photo)
+        preview_label.image = photo  # Keep reference to avoid garbage collection
+        preview_label.pack(side=tk.TOP)
+
+        def update_preview():
+            while self.canvas_preview_update:
+                cropped_img = crop(img, self.setup_canvas.rect_absolute)
+                preview_label.config(image=cropped_img)
+                preview_label.image = cropped_img
+
+                time.sleep(0.1)
+
+        self.canvas_preview_update = True
+        self.canvas_preview_update_thread = threading.Thread(target=update_preview)
+        self.canvas_preview_update_thread.start()
 
         self.setup_canvas.create_image(0.5 * photo_width, 0.5 * photo_height, image=photo)
         self.setup_canvas.image = photo  # Keep reference to avoid garbage collection
@@ -666,6 +829,8 @@ class FormSetupApp(CameraApp):
     def confirm_canvas_callback(self, bubble: Bubble):
         print(self.setup_canvas.rect_absolute)
         bubble.update_bounding_box(self.setup_canvas.rect_absolute)
+
+        self.canvas_preview_update = False
         self.close_canvas_window_callback()
 
     def close(self):
