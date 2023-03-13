@@ -17,7 +17,7 @@ import pupil_apriltags
 from PIL import Image, ImageTk
 from pupil_apriltags import Detector
 
-from util import four_point_transform, Color
+from util import four_point_transform, Color, rotate_image, filter_out_shadows
 from scroll_frame import ScrollFrame
 from canvas import Canvas
 
@@ -61,6 +61,9 @@ def sum_tup(tup_a, tup_b):
 
 
 class CameraApp:
+    PROCESSING_DIM = (640, 480)
+    ORIENTATION_TAG_ID = 0
+
     class Position(enum.Enum):
         TL = enum.auto()
         TR = enum.auto()
@@ -79,7 +82,7 @@ class CameraApp:
         self.snapshot_button = tk.Button(self.window, text="Take Snapshot", command=self.take_snapshot)
         self.snapshot_button.pack(side=tk.BOTTOM, padx=10, pady=10)
 
-        self.cap = get_capture_device(0)
+        self.cap = get_capture_device(1)
         if self.cap is None:
             exit(1)
 
@@ -162,6 +165,46 @@ class CameraApp:
                         tags: [pupil_apriltags.Detection],
                         positions: [Position]) -> [pupil_apriltags.Detection | None]:
         return [self.get_tag_at_pos(tags, position) for position in positions]
+
+    def orientation_correction(self, image: np.ndarray) -> np.ndarray:
+        if len(image.shape) != 2:
+            grayscale = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        else:
+            grayscale = image.copy()
+
+        tags = self.detector.detect(grayscale)
+
+        tag_pts = np.array([tag.center for tag in tags if tag.tag_id in self.possible_tags])
+        orientation_tag: pupil_apriltags.Detection = next(
+            (tag for tag in tags if tag.tag_id == CameraApp.ORIENTATION_TAG_ID), None
+        )
+
+        if orientation_tag is None:
+            return image
+
+        centroid_pt = tag_pts.mean(axis=0)
+        centroid_x, centroid_y = centroid_pt
+        tag_x, tag_y = orientation_tag.center
+
+        is_x_center = math.isclose(tag_x, centroid_x, abs_tol=10)
+        is_y_center = math.isclose(tag_y, centroid_y, abs_tol=10)
+
+        if tag_x < centroid_x and is_y_center:
+            # on left side
+            desired_rot_angle = -90
+        elif tag_x > centroid_x and is_y_center:
+            # on right side
+            desired_rot_angle = 90
+        elif tag_y < centroid_y and is_x_center:
+            # on top
+            desired_rot_angle = 0
+        elif tag_y > centroid_y and is_x_center:
+            # on bottom
+            desired_rot_angle = 180
+        else:
+            desired_rot_angle = 0
+
+        return rotate_image(image, desired_rot_angle)
 
     def contour_apriltags(self, image: np.ndarray) -> np.ndarray | None:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -321,7 +364,7 @@ class CameraApp:
             self.contour_apriltags(image)
 
             image = Image.fromarray(image)
-            image = image.resize((640, 480), Image.LANCZOS)
+            image = image.resize(CameraApp.PROCESSING_DIM, Image.LANCZOS)
 
             photo = ImageTk.PhotoImage(image)
             self.video_stream.config(image=photo)
@@ -341,7 +384,10 @@ class CameraApp:
             if self.snapshot_frame is not None:
                 # self.show_preview()
                 raw, grayscale = self.contour_edges(self.snapshot_frame)
-                self.locate_bubbles(grayscale)
+                corrected = self.orientation_correction(grayscale)
+                self.locate_bubbles(
+                    cv2.resize(corrected, dsize=CameraApp.PROCESSING_DIM, interpolation=cv2.INTER_LANCZOS4)
+                )
 
     def confirm_preview(self):
         self.preview_window.withdraw()
@@ -633,7 +679,7 @@ class FormSetupApp(CameraApp):
         self.canvas_preview_update = False  # continue updating while this is true, stop when false
         self.canvas_preview_update_thread: threading.Thread | None = None
 
-        self.setup_image: tk.Frame | None = None
+        self.setup_image: np.ndarray | None = None
         self.settings_frame: tk.Frame | None = None
 
         self.shown_questions_container: tk.Frame | None = None
@@ -707,9 +753,10 @@ class FormSetupApp(CameraApp):
             self.clear_preview()
             if self.snapshot_frame is not None:
                 raw_transform, grayscale_transform = self.contour_edges(self.snapshot_frame)
+                corrected = self.orientation_correction(raw_transform)
 
-                self.setup_image = raw_transform
-                self.img_window([Image.fromarray(raw_transform)], dims=(640, 480))
+                self.setup_image = corrected
+                self.img_window([Image.fromarray(corrected)], dims=CameraApp.PROCESSING_DIM)
 
     def confirm_preview(self):
         self.preview_window.withdraw()
@@ -717,7 +764,7 @@ class FormSetupApp(CameraApp):
 
         self.snapshot_frame = None
         # self.img_window([Image.fromarray(self.setup_frame)], dims=(640, 480))
-        self.make_setup_window(Image.fromarray(self.setup_image), dims=(640, 480))
+        self.make_setup_window(Image.fromarray(self.setup_image), dims=CameraApp.PROCESSING_DIM)
 
     def close_setup_window(self):
         self.setup_window.withdraw()
@@ -772,7 +819,7 @@ class FormSetupApp(CameraApp):
         clear_window(self.question_settings_window)
 
     def select_bubble_btn_callback(self, bubble: Bubble):
-        self.make_canvas_window(Image.fromarray(self.setup_image), bubble, dims=(640, 480))
+        self.make_canvas_window(Image.fromarray(self.setup_image), bubble, dims=CameraApp.PROCESSING_DIM)
 
     def make_canvas_window(self, canvas_image: Image, bubble: Bubble, dims=(240, 320)):
         self.canvas_container_window.protocol("WM_DELETE_WINDOW", self.close_canvas_window_callback)
@@ -843,12 +890,66 @@ class FormSetupApp(CameraApp):
         super().close()
 
 
+class CaptureResponsesApp(CameraApp):
+    def __init__(self, window: tk.Tk):
+        super().__init__(window)
+        try:
+            with open(FormSetupApp.JSON_PATH, "r") as input_json:
+                self.data = FormSetupApp.Data.from_json(json.loads(input_json.read()))
+        except FileNotFoundError:
+            raise RuntimeError("Cannot start CaptureResponsesApp when data.json does not exist!")
+        except EnvironmentError as environ_err:
+            raise RuntimeError(environ_err)
+
+    def locate_bubbles(self, grayscale: np.ndarray):
+        clahe: cv2.CLAHE = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        equalized_img = clahe.apply(grayscale)
+
+        shadow_filtered_image = filter_out_shadows(equalized_img)
+        ret, threshold = cv2.threshold(
+            shadow_filtered_image, np.median(shadow_filtered_image), 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
+        )
+
+        copy = cv2.cvtColor(threshold.copy(), cv2.COLOR_GRAY2RGB)
+        for question in self.data.questions:
+            for bubble in question.bubbles:
+                rect_x0, rect_y0 = bubble.rect_x, bubble.rect_y
+                rect_x1, rect_y1 = rect_x0 + bubble.rect_w, rect_y0 + bubble.rect_h
+                extracted_img: np.ndarray = threshold[rect_y0:rect_y1, rect_x0:rect_x1]
+
+                print((rect_x0, rect_y0, rect_x1, rect_y1))
+                n_px = bubble.rect_w * bubble.rect_h
+                n_white_px = np.count_nonzero(extracted_img)
+
+                bound_rect_x, bound_rect_y, bound_rect_w, bound_rect_h = cv2.boundingRect(extracted_img)
+                bound_rect_x0, bound_rect_y0 = bound_rect_x + rect_x0, bound_rect_y + rect_y0
+                bound_rect_x1 = bound_rect_x0 + bound_rect_w
+                bound_rect_y1 = bound_rect_y0 + bound_rect_y
+                # (circle_x, circle_y), radius = cv2.minEnclosingCircle(primary_contour)
+
+                print(extracted_img)
+                print(f"{extracted_img.shape}")
+                print(f"total={n_px}, white={n_white_px}")
+
+                cv2.rectangle(copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.GREEN.rgb)
+                cv2.rectangle(copy, (bound_rect_x0, bound_rect_y0), (bound_rect_x1, bound_rect_y1), Color.BLUE.rgb)
+                # cv2.circle(copy, (int(circle_x), int(circle_y)), int(radius), Color.RED.rgb)
+
+                print(f"{question.name}:{bubble.name}={n_white_px/n_px}")
+
+        self.img_window([Image.fromarray(copy)], dims=CameraApp.PROCESSING_DIM)
+        # self.img_window([Image.fromarray(shadow_filtered_image)], dims=CameraApp.PROCESSING_DIM)
+
+
+
 tk_window = tk.Tk()
-setup = FormSetupApp(tk_window)
-setup.update_stream()
+# setup = FormSetupApp(tk_window)
+# setup.update_stream()
 
 # app = CameraApp(tk_window)
 # app.update_stream()
+setup = CaptureResponsesApp(tk_window)
+setup.update_stream()
 tk_window.mainloop()
 
 # Make sure to close the camera stream when we exit

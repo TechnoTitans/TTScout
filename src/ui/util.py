@@ -107,3 +107,48 @@ def four_point_transform(image: np.ndarray, pts) -> np.ndarray:
 
     # return the warped image
     return warped
+
+
+def rotate_image(mat: np.ndarray, angle: float):
+    """
+        Rotates an image (angle in degrees) and expands image to avoid cropping
+        """
+
+    height, width = mat.shape[:2]  # image shape has 3 dimensions
+    # getRotationMatrix2D needs coordinates in reverse order (width, height) compared to shape
+    image_center = (width / 2, height / 2)
+
+    rotation_mat = cv2.getRotationMatrix2D(image_center, angle, 1.)
+
+    # rotation calculates the cos and sin, taking absolutes of those.
+    abs_cos = abs(rotation_mat[0, 0])
+    abs_sin = abs(rotation_mat[0, 1])
+
+    # find the new width and height bounds
+    bound_w = int(height * abs_sin + width * abs_cos)
+    bound_h = int(height * abs_cos + width * abs_sin)
+
+    # subtract old image center (bringing image back to origo) and adding the new image center coordinates
+    rotation_mat[0, 2] += bound_w / 2 - image_center[0]
+    rotation_mat[1, 2] += bound_h / 2 - image_center[1]
+
+    # rotate image with the new bounds and translated rotation matrix
+    rotated_mat = cv2.warpAffine(mat, rotation_mat, (bound_w, bound_h))
+    return rotated_mat
+
+
+def filter_out_shadows(image: np.ndarray):
+    rgb_planes = cv2.split(image)
+    normalized_planes = []
+    for plane in rgb_planes:
+        dilated_image = cv2.dilate(plane, np.ones((7, 7), np.uint8))
+        bg_image = cv2.medianBlur(dilated_image, 21)
+        diff_image = 255 - cv2.absdiff(plane, bg_image)
+
+        normalized_image = cv2.normalize(
+            diff_image, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1
+        )
+
+        normalized_planes.append(normalized_image)
+
+    return cv2.merge(normalized_planes)

@@ -8,11 +8,11 @@
                     "bubble_frame": {},
                     "bubble_name": {},
                     "is_tk": true,
-                    "name": "bubble0",
-                    "rect_h": 1,
-                    "rect_w": 1,
-                    "rect_x": 0,
-                    "rect_y": 0,
+                    "name": "Success",
+                    "rect_h": 13,
+                    "rect_w": 14,
+                    "rect_x": 119,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -20,11 +20,11 @@
                     "bubble_frame": {},
                     "bubble_name": {},
                     "is_tk": true,
-                    "name": "bubble1",
-                    "rect_h": 1,
-                    "rect_w": 1,
-                    "rect_x": 1,
-                    "rect_y": 1,
+                    "name": "DNA",
+                    "rect_h": 13,
+                    "rect_w": 14,
+                    "rect_x": 139,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 }
             ],
@@ -32,7 +32,7 @@
             "delete_button": {},
             "delete_button_frame": {},
             "is_tk": true,
-            "name": "why?",
+            "name": "Mobility",
             "question_frame": {},
             "question_name": {}
         },
@@ -44,10 +44,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Success",
-                    "rect_h": 23,
-                    "rect_w": 28,
-                    "rect_x": 100,
-                    "rect_y": 126,
+                    "rect_h": 13,
+                    "rect_w": 14,
+                    "rect_x": 115,
+                    "rect_y": 140,
                     "select_bubble_button": null
                 },
                 {
@@ -56,10 +56,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "DNA",
-                    "rect_h": 22,
-                    "rect_w": 26,
-                    "rect_x": 122,
-                    "rect_y": 127,
+                    "rect_h": 13,
+                    "rect_w": 14,
+                    "rect_x": 135,
+                    "rect_y": 141,
                     "select_bubble_button": null
                 }
             ],
@@ -67,7 +67,134 @@
             "delete_button": {},
             "delete_button_frame": {},
             "is_tk": true,
-            "name": "Mobility",
+            "name": "Docked",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 13,
+                    "rect_w": 14,
+                    "rect_x": 121,
+                    "rect_y": 154,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "DNA",
+                    "rect_h": 13,
+                    "rect_w": 14,
+                    "rect_x": 141,
+                    "rect_y": 154,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "delete_button": {},
+            "delete_button_frame": {},
+            "is_tk": true,
+            "name": "Engaged",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 11,
+                    "rect_w": 14,
+                    "rect_x": 398,
+                    "rect_y": 137,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "delete_button": {},
+            "delete_button_frame": {},
+            "is_tk": true,
+            "name": "DefensePlayed",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 11,
+                    "rect_w": 14,
+                    "rect_x": 414,
+                    "rect_y": 153,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "delete_button": {},
+            "delete_button_frame": {},
+            "is_tk": true,
+            "name": "DefenseReceived",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 11,
+                    "rect_w": 14,
+                    "rect_x": 374,
+                    "rect_y": 197,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "delete_button": {},
+            "delete_button_frame": {},
+            "is_tk": true,
+            "name": "Disqualified",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 11,
+                    "rect_w": 14,
+                    "rect_x": 466,
+                    "rect_y": 212,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "delete_button": {},
+            "delete_button_frame": {},
+            "is_tk": true,
+            "name": "HPInteraction",
             "question_frame": {},
             "question_name": {}
         }
