@@ -1,0 +1,34 @@
+{
+    "name": "TTScout",
+    "questions": [
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": null,
+                    "bubble_frame": null,
+                    "bubble_name": null,
+                    "is_tk": false,
+                    "name": "bubble0",
+                    "rect_h": 1,
+                    "rect_w": 1,
+                    "rect_x": 0,
+                    "rect_y": 0,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": null,
+                    "bubble_frame": null,
+                    "bubble_name": null,
+                    "is_tk": false,
+                    "name": "bubble1",
+                    "rect_h": 1,
+                    "rect_w": 1,
+                    "rect_x": 1,
+                    "rect_y": 1,
+                    "select_bubble_button": null
+                }
+            ],
+            "name": "why?"
+        }
+    ]
+}

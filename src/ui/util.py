@@ -1,6 +1,31 @@
+import enum
+
 from scipy.spatial import distance as dist
 import numpy as np
 import cv2
+
+
+# TODO is there a better way of doing this or is this already in an lib somewhere
+# TODO also don't like how I have to use the rgb property, I wish it would just be
+#  Color.RED and it would just pass in a tuple but you'd have to do either
+#  Color.RED.value or in this case (somewhat better) Color.RED.rgb
+
+
+class Color(enum.Enum):
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    BLUE = (0, 0, 255)
+
+    BLACK = (0, 0, 0)
+    ALMOST_BLACK = (30, 30, 30)
+
+    @property
+    def rgb(self):
+        return self.value
+
+    @property
+    def hex(self):
+        return '#%02x%02x%02x' % self.value
 
 
 def order_points(pts):
@@ -55,7 +80,7 @@ def transform_width_height_compute(tl, tr, br, bl):
     return max_width, max_height
 
 
-def four_point_transform(image, pts):
+def four_point_transform(image: np.ndarray, pts) -> np.ndarray:
     # obtain a consistent order of the points and unpack them
     # individually
     rect = order_points(pts)
