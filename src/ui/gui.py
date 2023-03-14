@@ -16,16 +16,18 @@ import numpy as np
 import pupil_apriltags
 from PIL import Image, ImageTk
 from pupil_apriltags import Detector
+from scipy import ndimage as ndi
 
 from util import four_point_transform, Color, rotate_image, filter_out_shadows
 from scroll_frame import ScrollFrame
 from canvas import Canvas
 
 
-def get_capture_device(source):
+def get_capture_device(source: int, suppress_warn=False):
     device = cv2.VideoCapture(source)
     if device is None or not device.isOpened():
-        warnings.warn(f"Unable to open VideoCapture Stream on Source: {source}")
+        if not suppress_warn:
+            warnings.warn(f"Unable to open VideoCapture Stream on Source: {source}")
         return None
 
     # set to maximum resolution
@@ -35,11 +37,17 @@ def get_capture_device(source):
     return device
 
 
-def clear_window(window: tk.BaseWidget, exclude: tk.BaseWidget | [tk.BaseWidget] = None):
-    if window.winfo_exists():
-        for widget in window.winfo_children():
+def clear_widget(parent: tk.BaseWidget, exclude: tk.BaseWidget | [tk.BaseWidget] = None):
+    if parent.winfo_exists():
+        for widget in parent.winfo_children():
             if (type(exclude) is list and widget not in exclude) or (widget is not exclude):
                 widget.destroy()
+
+
+def clear_window(window: tk.Tk):
+    if window.winfo_exists():
+        for widget in window.winfo_children():
+            widget.destroy()
 
 
 def get_tag_bounds(tag_pts):
@@ -60,9 +68,18 @@ def sum_tup(tup_a, tup_b):
     return tuple(map(sum, zip(tup_a, tup_b)))
 
 
+def consecutive(data, step_size=1):
+    return np.split(data, np.where(np.diff(data) != step_size)[0] + 1)
+
+
 class CameraApp:
     PROCESSING_DIM = (640, 480)
     ORIENTATION_TAG_ID = 0
+
+    PROCESSING_CLIP_LIMIT = 2.0
+    PROCESSING_TILE_GRID_SIZE = (8, 8)
+
+    BUBBLE_DETECTION_BASELINE = 0.2
 
     class Position(enum.Enum):
         TL = enum.auto()
@@ -82,7 +99,7 @@ class CameraApp:
         self.snapshot_button = tk.Button(self.window, text="Take Snapshot", command=self.take_snapshot)
         self.snapshot_button.pack(side=tk.BOTTOM, padx=10, pady=10)
 
-        self.cap = get_capture_device(1)
+        self.cap = get_capture_device(0)
         if self.cap is None:
             exit(1)
 
@@ -167,12 +184,7 @@ class CameraApp:
         return [self.get_tag_at_pos(tags, position) for position in positions]
 
     def orientation_correction(self, image: np.ndarray) -> np.ndarray:
-        if len(image.shape) != 2:
-            grayscale = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        else:
-            grayscale = image.copy()
-
-        tags = self.detector.detect(grayscale)
+        tags = self.detector.detect(image)
 
         tag_pts = np.array([tag.center for tag in tags if tag.tag_id in self.possible_tags])
         orientation_tag: pupil_apriltags.Detection = next(
@@ -184,27 +196,48 @@ class CameraApp:
 
         centroid_pt = tag_pts.mean(axis=0)
         centroid_x, centroid_y = centroid_pt
+
+        mat_shape = image.shape
+        mat_center_x, mat_center_y = mat_shape[1] / 2, mat_shape[0] / 2
+
+        center_x = centroid_x if math.isclose(centroid_x, mat_center_x, abs_tol=5) else mat_center_x
+        center_y = centroid_y if math.isclose(centroid_y, mat_center_y, abs_tol=5) else mat_center_y
+
         tag_x, tag_y = orientation_tag.center
 
-        is_x_center = math.isclose(tag_x, centroid_x, abs_tol=10)
-        is_y_center = math.isclose(tag_y, centroid_y, abs_tol=10)
+        is_x_center = math.isclose(tag_x, center_x, abs_tol=10)
+        is_y_center = math.isclose(tag_y, center_y, abs_tol=10)
 
-        if tag_x < centroid_x and is_y_center:
+        if tag_x < center_x and is_y_center:
             # on left side
             desired_rot_angle = -90
-        elif tag_x > centroid_x and is_y_center:
+        elif tag_x > center_x and is_y_center:
             # on right side
             desired_rot_angle = 90
-        elif tag_y < centroid_y and is_x_center:
+        elif tag_y < center_y and is_x_center:
             # on top
             desired_rot_angle = 0
-        elif tag_y > centroid_y and is_x_center:
+        elif tag_y > center_y and is_x_center:
             # on bottom
             desired_rot_angle = 180
         else:
             desired_rot_angle = 0
 
         return rotate_image(image, desired_rot_angle)
+
+    def process_snapshot(self, grayscale: np.ndarray) -> np.ndarray:
+        clahe: cv2.CLAHE = cv2.createCLAHE(
+            clipLimit=self.PROCESSING_CLIP_LIMIT, tileGridSize=self.PROCESSING_TILE_GRID_SIZE
+        )
+
+        equalized_img = clahe.apply(grayscale)
+
+        shadow_filtered_image = filter_out_shadows(equalized_img)
+        ret, threshold = cv2.threshold(
+            shadow_filtered_image, np.median(shadow_filtered_image), 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
+        )
+
+        return threshold
 
     def contour_apriltags(self, image: np.ndarray) -> np.ndarray | None:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -215,6 +248,7 @@ class CameraApp:
             if tag.tag_id in self.possible_tags or tag.tag_id == 0:
                 pts = tag.corners.astype(int)
                 cv2.polylines(image, [pts], True, Color.GREEN.rgb, 2)
+                cv2.circle(image, tag.center.astype(int), 5, Color.BLUE.rgb, -1)
                 cv2.putText(
                     image, str(tag.tag_id),
                     sum_tup(get_center(*get_tag_bounds(pts)), self.tag_id_text_offset),
@@ -228,10 +262,6 @@ class CameraApp:
             # Draw the box with the centers of the tags
             center = get_center(x_min, y_min, x_max, y_max)
             cv2.circle(image, center, 5, Color.BLUE.rgb, -1)
-
-            # Display the centers of each tag
-            for tag in tags:
-                cv2.circle(image, tag.center.astype(int), 5, Color.BLUE.rgb, -1)
 
             # Calculate the rotation matrix
 
@@ -373,7 +403,7 @@ class CameraApp:
         self.video_stream.after(10, self.update_stream)
 
     def clear_preview(self):
-        clear_window(self.preview_window)
+        clear_widget(self.preview_window)
 
     def take_snapshot(self):
         ret, frame = self.cap.read()
@@ -753,9 +783,10 @@ class FormSetupApp(CameraApp):
             self.clear_preview()
             if self.snapshot_frame is not None:
                 raw_transform, grayscale_transform = self.contour_edges(self.snapshot_frame)
-                corrected = self.orientation_correction(raw_transform)
+                corrected = self.orientation_correction(grayscale_transform)
+                processed = self.process_snapshot(corrected)
 
-                self.setup_image = corrected
+                self.setup_image = processed
                 self.img_window([Image.fromarray(corrected)], dims=CameraApp.PROCESSING_DIM)
 
     def confirm_preview(self):
@@ -768,7 +799,7 @@ class FormSetupApp(CameraApp):
 
     def close_setup_window(self):
         self.setup_window.withdraw()
-        clear_window(self.setup_window)
+        clear_widget(self.setup_window)
         self.setup_image = None
 
     def add_question_btn_callback(self):
@@ -816,7 +847,7 @@ class FormSetupApp(CameraApp):
         self.curr_question_setting_bubbles.clear()
 
         self.question_settings_window.withdraw()
-        clear_window(self.question_settings_window)
+        clear_widget(self.question_settings_window)
 
     def select_bubble_btn_callback(self, bubble: Bubble):
         self.make_canvas_window(Image.fromarray(self.setup_image), bubble, dims=CameraApp.PROCESSING_DIM)
@@ -830,11 +861,12 @@ class FormSetupApp(CameraApp):
 
         # Create a PhotoImage object for the setup_image
         img = canvas_image.resize(dims, Image.LANCZOS)
+        img_mat = np.array(img)
         photo = ImageTk.PhotoImage(img)
         photo_width, photo_height = photo.width(), photo.height()
 
-        def crop(crop_img: Image, rect: (int, int, int, int), post_resize=(160, 160)):
-            return ImageTk.PhotoImage(crop_img.crop(rect).resize(post_resize, Image.LANCZOS))
+        def crop(crop_img: Image, rect: (int, int, int, int), post_resize=(160, 160)) -> Image:
+            return crop_img.crop(rect).resize(post_resize, Image.LANCZOS)
 
         preview_frame = tk.Frame(self.canvas_container_window)
         preview_frame.pack(side=tk.TOP, padx=10, pady=10)
@@ -843,11 +875,32 @@ class FormSetupApp(CameraApp):
         preview_label.image = photo  # Keep reference to avoid garbage collection
         preview_label.pack(side=tk.TOP)
 
+        preview_text = tk.Text(preview_frame, width=40, height=1)
+        preview_text.insert("1.0", "No Data Yet...")
+        preview_text["state"] = "disabled"
+        preview_text.pack(side=tk.LEFT)
+
+        _baseline_percent = 100 * CameraApp.BUBBLE_DETECTION_BASELINE
+
         def update_preview():
             while self.canvas_preview_update:
                 cropped_img = crop(img, self.setup_canvas.rect_absolute)
-                preview_label.config(image=cropped_img)
-                preview_label.image = cropped_img
+
+                tk_img = ImageTk.PhotoImage(cropped_img)
+                preview_label.config(image=tk_img)
+                preview_label.image = tk_img
+
+                rect_x0, rect_y0, rect_x1, rect_y1 = self.setup_canvas.rect_absolute
+                extracted_img: np.ndarray = img_mat[rect_y0:rect_y1, rect_x0:rect_x1]
+
+                n_px = (rect_x1 - rect_x0) * (rect_y1 - rect_y0)
+                n_white_px = np.count_nonzero(extracted_img)
+                prop_white = n_white_px / n_px
+
+                preview_text["state"] = "normal"
+                preview_text.delete("1.0", "1.end")
+                preview_text.insert("1.0", f"{(100 * prop_white):3.3f}% white; baseline={_baseline_percent}")
+                preview_text["state"] = "disabled"
 
                 time.sleep(0.1)
 
@@ -871,7 +924,7 @@ class FormSetupApp(CameraApp):
 
     def close_canvas_window_callback(self):
         self.canvas_container_window.withdraw()
-        clear_window(self.canvas_container_window, exclude=self.setup_canvas)
+        clear_widget(self.canvas_container_window, exclude=self.setup_canvas)
 
     def confirm_canvas_callback(self, bubble: Bubble):
         print(self.setup_canvas.rect_absolute)
@@ -901,45 +954,213 @@ class CaptureResponsesApp(CameraApp):
         except EnvironmentError as environ_err:
             raise RuntimeError(environ_err)
 
+    @classmethod
+    def check_bubble_center_completeness(cls, bubble: np.ndarray):
+        for row in bubble:
+            if len(consecutive(row, step_size=0)) > 3:
+                return False
+
+        return True
+
+    @classmethod
+    def check_bubble_mono_contour(cls, bubble: np.ndarray):
+        contours, hierarchy = cv2.findContours(bubble, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        return len(hierarchy) == 1 if hierarchy is not None else True
+
+    @classmethod
+    def check_bubble_white_px_prop(cls, width: int, height: int, bubble: np.ndarray):
+        n_px, n_white_px = width * height, np.count_nonzero(bubble)
+        proportion = n_white_px / n_px
+
+        return proportion >= CaptureResponsesApp.BUBBLE_DETECTION_BASELINE
+
+    @classmethod
+    def check_bubble_mono_region(cls, bubble: np.ndarray):
+        labeled, n_labels = ndi.label(bubble)
+        return n_labels <= 1
+
     def locate_bubbles(self, grayscale: np.ndarray):
-        clahe: cv2.CLAHE = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        equalized_img = clahe.apply(grayscale)
+        threshold = self.process_snapshot(grayscale)
+        disp_copy = cv2.cvtColor(threshold.copy(), cv2.COLOR_GRAY2RGB)
 
-        shadow_filtered_image = filter_out_shadows(equalized_img)
-        ret, threshold = cv2.threshold(
-            shadow_filtered_image, np.median(shadow_filtered_image), 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
-        )
-
-        copy = cv2.cvtColor(threshold.copy(), cv2.COLOR_GRAY2RGB)
+        marked_bubbles = []
         for question in self.data.questions:
             for bubble in question.bubbles:
                 rect_x0, rect_y0 = bubble.rect_x, bubble.rect_y
                 rect_x1, rect_y1 = rect_x0 + bubble.rect_w, rect_y0 + bubble.rect_h
                 extracted_img: np.ndarray = threshold[rect_y0:rect_y1, rect_x0:rect_x1]
 
-                print((rect_x0, rect_y0, rect_x1, rect_y1))
-                n_px = bubble.rect_w * bubble.rect_h
-                n_white_px = np.count_nonzero(extracted_img)
-
-                bound_rect_x, bound_rect_y, bound_rect_w, bound_rect_h = cv2.boundingRect(extracted_img)
-                bound_rect_x0, bound_rect_y0 = bound_rect_x + rect_x0, bound_rect_y + rect_y0
-                bound_rect_x1 = bound_rect_x0 + bound_rect_w
-                bound_rect_y1 = bound_rect_y0 + bound_rect_y
-                # (circle_x, circle_y), radius = cv2.minEnclosingCircle(primary_contour)
-
-                print(extracted_img)
-                print(f"{extracted_img.shape}")
-                print(f"total={n_px}, white={n_white_px}")
-
-                cv2.rectangle(copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.GREEN.rgb)
-                cv2.rectangle(copy, (bound_rect_x0, bound_rect_y0), (bound_rect_x1, bound_rect_y1), Color.BLUE.rgb)
+                # cv2.rectangle(disp_copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.GREEN.rgb)
                 # cv2.circle(copy, (int(circle_x), int(circle_y)), int(radius), Color.RED.rgb)
 
-                print(f"{question.name}:{bubble.name}={n_white_px/n_px}")
+                flat_nonzero = np.flatnonzero(extracted_img) % bubble.rect_w
+                if len(flat_nonzero) > 0:
+                    leftmost_y = np.min(flat_nonzero)
+                    rightmost_y = np.max(flat_nonzero)
 
-        self.img_window([Image.fromarray(copy)], dims=CameraApp.PROCESSING_DIM)
+                    # print(f"ly: {leftmost_y}, ry: {rightmost_y}")
+
+                center_completeness = CaptureResponsesApp.check_bubble_center_completeness(extracted_img)
+                mono_contour = CaptureResponsesApp.check_bubble_mono_contour(extracted_img)
+                white_px_prop_above_baseline = CaptureResponsesApp.check_bubble_white_px_prop(
+                    bubble.rect_w, bubble.rect_h, extracted_img
+                )
+                mono_region = CaptureResponsesApp.check_bubble_mono_region(extracted_img)
+
+                conditions = [center_completeness, mono_contour, white_px_prop_above_baseline, mono_region]
+                meets_all_conditions = all(conditions)
+
+                # print(extracted_img)
+                # print(f"cc: {center_completeness}, "
+                #       f"mc: {mono_contour}, "
+                #       f"wp: {white_px_prop_above_baseline}, "
+                #       f"mr: {mono_region}")
+                #
+                # print(f"{question.name}:{bubble.name}="
+                #       f"{meets_all_conditions}")
+
+                if meets_all_conditions:
+                    cv2.rectangle(disp_copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.GREEN.rgb)
+                    marked_bubbles.append(meets_all_conditions)
+                else:
+                    cv2.rectangle(disp_copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.RED.rgb)
+
+        self.img_window([Image.fromarray(disp_copy)], dims=CameraApp.PROCESSING_DIM)
         # self.img_window([Image.fromarray(shadow_filtered_image)], dims=CameraApp.PROCESSING_DIM)
 
+
+class SelectionMenuApp:
+    PREVIEW_STREAM_DIM = (320, 240)
+    MAX_SUPPORTED_CAPTURE_DEVICES = 12
+
+    class Mode(enum.Enum):
+        FormSetup = 1
+        CaptureResponses = 2
+        Camera = 3
+
+    def __init__(self, window: tk.Tk):
+        self.window = window
+        self.window.title("SelectionMenu")
+
+        self.video_frame = tk.Frame(self.window)
+        self.video_frame.pack(side=tk.TOP, padx=10, pady=10)
+
+        self.mode_selection_window = tk.Toplevel(self.window)
+        self.mode_selection_window.withdraw()
+
+        self.selected_camera_id = None
+        self.selected_camera = None
+
+        self.selected_mode = None
+
+        self.instance = None
+
+        self.capture_devices = []
+        for capture_id in range(SelectionMenuApp.MAX_SUPPORTED_CAPTURE_DEVICES):
+            device = get_capture_device(capture_id, suppress_warn=True)
+            if device is None:
+                break
+
+            self.capture_devices.append(device)
+
+        self.video_stream_labels: [tk.Label] = []
+        self.select_camera_buttons: [tk.Button] = []
+
+        for i in range(len(self.capture_devices)):
+            stream_label = tk.Label(self.video_frame)
+            stream_label.pack()
+
+            select_camera_button = tk.Button(self.window, text="Select", command=lambda: self.select_camera(i))
+            select_camera_button.pack(side=tk.BOTTOM, padx=10, pady=10)
+
+            self.select_camera_buttons.append(select_camera_button)
+            self.video_stream_labels.append(stream_label)
+
+    def select_camera(self, device_id: int):
+        self.selected_camera_id = device_id
+        self.selected_camera = self.capture_devices[device_id]
+
+        self.make_mode_selection_window()
+        self.close_camera_selection_window()
+
+    def close_camera_selection_window(self):
+        clear_widget(self.video_frame)
+
+    def make_mode_selection_window(self):
+        # self.mode_selection_window.protocol("WM_DELETE_WINDOW", self.close_canvas_window_callback)
+
+        # Deiconify/Show the window
+        if self.mode_selection_window.winfo_exists():
+            self.mode_selection_window.deiconify()
+
+        selection_frame = tk.Frame(self.mode_selection_window)
+        selection_frame.pack(side=tk.TOP, padx=10, pady=10)
+
+        mode_selection_buttons = []
+        for mode in SelectionMenuApp.Mode:
+            button = tk.Button(selection_frame, text=mode.name, command=lambda v=mode.value: self.select_mode(v))
+            button.pack(side=tk.BOTTOM)
+
+            mode_selection_buttons.append(button)
+
+    def close_mode_selection_window(self):
+        self.mode_selection_window.withdraw()
+        clear_widget(self.mode_selection_window)
+
+    def select_mode(self, mode_val: int):
+        self.selected_mode = SelectionMenuApp.Mode(mode_val)
+
+        self.close_mode_selection_window()
+        clear_window(self.window)
+        self.close(window_keepalive=True)
+
+        if self.selected_mode == SelectionMenuApp.Mode.Camera:
+            self.instance = CameraApp(self.window)
+            self.instance.update_stream()
+        elif self.selected_mode == SelectionMenuApp.Mode.FormSetup:
+            self.instance = FormSetupApp(self.window)
+            self.instance.update_stream()
+        elif self.selected_mode == SelectionMenuApp.Mode.CaptureResponses:
+            self.instance = CaptureResponsesApp(self.window)
+            self.instance.update_stream()
+        else:
+            raise ValueError("Invalid mode passed to select_mode!")
+
+    def update_stream(self):
+        frame_rets = []
+        for device in self.capture_devices:
+            ret, frame = device.read()
+            frame_rets.append((ret, frame))
+
+        ran_once = False
+        for i, frame_ret in enumerate(frame_rets):
+            ret, frame = frame_ret
+            if ret:
+                label = self.video_stream_labels[i]
+                image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                image = Image.fromarray(image)
+                image = image.resize(SelectionMenuApp.PREVIEW_STREAM_DIM, Image.LANCZOS)
+
+                photo = ImageTk.PhotoImage(image)
+                label.config(image=photo)
+                label.image = photo
+
+                if not ran_once:
+                    label.after(10, self.update_stream)
+                    ran_once = True
+
+    def close(self, window_keepalive=False):
+        for device in self.capture_devices:
+            device.release()
+
+        if window_keepalive:
+            return
+
+        try:
+            self.window.destroy()
+        except tk.TclError:
+            pass
 
 
 tk_window = tk.Tk()
@@ -948,8 +1169,12 @@ tk_window = tk.Tk()
 
 # app = CameraApp(tk_window)
 # app.update_stream()
-setup = CaptureResponsesApp(tk_window)
+# setup = CaptureResponsesApp(tk_window)
+# setup.update_stream()
+
+setup = SelectionMenuApp(tk_window)
 setup.update_stream()
+
 tk_window.mainloop()
 
 # Make sure to close the camera stream when we exit

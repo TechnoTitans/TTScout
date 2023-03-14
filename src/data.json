@@ -9,10 +9,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Success",
-                    "rect_h": 13,
-                    "rect_w": 14,
-                    "rect_x": 119,
-                    "rect_y": 126,
+                    "rect_h": 7,
+                    "rect_w": 16,
+                    "rect_x": 122,
+                    "rect_y": 138,
                     "select_bubble_button": null
                 },
                 {
@@ -21,90 +21,90 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "DNA",
-                    "rect_h": 13,
-                    "rect_w": 14,
-                    "rect_x": 139,
-                    "rect_y": 126,
-                    "select_bubble_button": null
-                }
-            ],
-            "bubbles_frame": {},
-            "delete_button": {},
-            "delete_button_frame": {},
-            "is_tk": true,
-            "name": "Mobility",
-            "question_frame": {},
-            "question_name": {}
-        },
-        {
-            "bubbles": [
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "Success",
-                    "rect_h": 13,
-                    "rect_w": 14,
-                    "rect_x": 115,
-                    "rect_y": 140,
-                    "select_bubble_button": null
-                },
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "DNA",
-                    "rect_h": 13,
-                    "rect_w": 14,
-                    "rect_x": 135,
-                    "rect_y": 141,
-                    "select_bubble_button": null
-                }
-            ],
-            "bubbles_frame": {},
-            "delete_button": {},
-            "delete_button_frame": {},
-            "is_tk": true,
-            "name": "Docked",
-            "question_frame": {},
-            "question_name": {}
-        },
-        {
-            "bubbles": [
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "Success",
-                    "rect_h": 13,
-                    "rect_w": 14,
-                    "rect_x": 121,
-                    "rect_y": 154,
-                    "select_bubble_button": null
-                },
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "DNA",
-                    "rect_h": 13,
-                    "rect_w": 14,
+                    "rect_h": 7,
+                    "rect_w": 16,
                     "rect_x": 141,
-                    "rect_y": 154,
+                    "rect_y": 138,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": {},
-            "delete_button": {},
-            "delete_button_frame": {},
-            "is_tk": true,
-            "name": "Engaged",
-            "question_frame": {},
-            "question_name": {}
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
+            "name": "AutoMobility",
+            "question_frame": null,
+            "question_name": null
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 7,
+                    "rect_w": 16,
+                    "rect_x": 117,
+                    "rect_y": 151,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "DNA",
+                    "rect_h": 7,
+                    "rect_w": 16,
+                    "rect_x": 137,
+                    "rect_y": 151,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
+            "name": "AutoDocked",
+            "question_frame": null,
+            "question_name": null
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 7,
+                    "rect_w": 16,
+                    "rect_x": 124,
+                    "rect_y": 165,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "DNA",
+                    "rect_h": 7,
+                    "rect_w": 16,
+                    "rect_x": 143,
+                    "rect_y": 165,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
+            "name": "AutoEngaged",
+            "question_frame": null,
+            "question_name": null
         },
         {
             "bubbles": [
@@ -115,19 +115,19 @@
                     "is_tk": true,
                     "name": "Success",
                     "rect_h": 11,
-                    "rect_w": 14,
-                    "rect_x": 398,
-                    "rect_y": 137,
+                    "rect_w": 12,
+                    "rect_x": 392,
+                    "rect_y": 145,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": {},
-            "delete_button": {},
-            "delete_button_frame": {},
-            "is_tk": true,
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
             "name": "DefensePlayed",
-            "question_frame": {},
-            "question_name": {}
+            "question_frame": null,
+            "question_name": null
         },
         {
             "bubbles": [
@@ -138,19 +138,161 @@
                     "is_tk": true,
                     "name": "Success",
                     "rect_h": 11,
-                    "rect_w": 14,
-                    "rect_x": 414,
-                    "rect_y": 153,
+                    "rect_w": 12,
+                    "rect_x": 407,
+                    "rect_y": 159,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": {},
-            "delete_button": {},
-            "delete_button_frame": {},
-            "is_tk": true,
-            "name": "DefenseReceived",
-            "question_frame": {},
-            "question_name": {}
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
+            "name": "Defense Received",
+            "question_frame": null,
+            "question_name": null
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "1",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 385,
+                    "rect_y": 173,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "2",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 408,
+                    "rect_y": 174,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "3",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 430,
+                    "rect_y": 174,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "4",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 452,
+                    "rect_y": 174,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "5",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 475,
+                    "rect_y": 174,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
+            "name": "DriverQuality",
+            "question_frame": null,
+            "question_name": null
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "1",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 417,
+                    "rect_y": 188,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "2",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 440,
+                    "rect_y": 188,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "3",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 463,
+                    "rect_y": 188,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "4",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 486,
+                    "rect_y": 188,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "5",
+                    "rect_h": 11,
+                    "rect_w": 12,
+                    "rect_x": 509,
+                    "rect_y": 188,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
+            "name": "MechanicalQuality",
+            "question_frame": null,
+            "question_name": null
         },
         {
             "bubbles": [
@@ -161,19 +303,19 @@
                     "is_tk": true,
                     "name": "Success",
                     "rect_h": 11,
-                    "rect_w": 14,
-                    "rect_x": 374,
-                    "rect_y": 197,
+                    "rect_w": 12,
+                    "rect_x": 369,
+                    "rect_y": 202,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": {},
-            "delete_button": {},
-            "delete_button_frame": {},
-            "is_tk": true,
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
             "name": "Disqualified",
-            "question_frame": {},
-            "question_name": {}
+            "question_frame": null,
+            "question_name": null
         },
         {
             "bubbles": [
@@ -184,19 +326,257 @@
                     "is_tk": true,
                     "name": "Success",
                     "rect_h": 11,
-                    "rect_w": 14,
-                    "rect_x": 466,
-                    "rect_y": 212,
+                    "rect_w": 12,
+                    "rect_x": 457,
+                    "rect_y": 215,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": {},
-            "delete_button": {},
-            "delete_button_frame": {},
-            "is_tk": true,
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
             "name": "HPInteraction",
-            "question_frame": {},
-            "question_name": {}
+            "question_frame": null,
+            "question_name": null
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_1",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 72,
+                    "rect_y": 95,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cube_2",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 93,
+                    "rect_y": 93,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_3",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 114,
+                    "rect_y": 95,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_4",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 134,
+                    "rect_y": 95,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cube_5",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 153,
+                    "rect_y": 93,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_6",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 174,
+                    "rect_y": 95,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_7",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 195,
+                    "rect_y": 95,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cube_8",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 215,
+                    "rect_y": 93,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_9",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 236,
+                    "rect_y": 94,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
+            "name": "AutoHighNode",
+            "question_frame": null,
+            "question_name": null
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_1",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 73,
+                    "rect_y": 105,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cube_2",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 93,
+                    "rect_y": 104,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_3",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 114,
+                    "rect_y": 105,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_4",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 134,
+                    "rect_y": 104,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cube_5",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 154,
+                    "rect_y": 104,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_6",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 174,
+                    "rect_y": 104,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_7",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 195,
+                    "rect_y": 105,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cube_8",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 216,
+                    "rect_y": 104,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Cone_9",
+                    "rect_h": 7,
+                    "rect_w": 13,
+                    "rect_x": 237,
+                    "rect_y": 104,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": null,
+            "delete_button": null,
+            "delete_button_frame": null,
+            "is_tk": false,
+            "name": "AutoMidNode",
+            "question_frame": null,
+            "question_name": null
         }
     ]
 }
