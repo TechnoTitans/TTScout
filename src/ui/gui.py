@@ -10,6 +10,9 @@ import warnings
 import atexit
 import threading
 import enum
+import os.path
+import csv
+import random
 
 import cv2
 import numpy as np
@@ -31,8 +34,11 @@ def get_capture_device(source: int, suppress_warn=False):
         return None
 
     # set to maximum resolution
-    device.set(3, device.get(cv2.CAP_PROP_FRAME_WIDTH))
-    device.set(4, device.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    # device.set(3, device.get(cv2.CAP_PROP_FRAME_WIDTH))
+    # device.set(4, device.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    device.set(3, 1280)
+    device.set(4, 720)
 
     return device
 
@@ -81,13 +87,16 @@ class CameraApp:
 
     BUBBLE_DETECTION_BASELINE = 0.2
 
+    _TK_TEXT_NORMAL = "normal"
+    _TK_TEXT_DISABLED = "disabled"
+
     class Position(enum.Enum):
         TL = enum.auto()
         TR = enum.auto()
         BL = enum.auto()
         BR = enum.auto()
 
-    def __init__(self, window: tk.Tk):
+    def __init__(self, window: tk.Tk, device: cv2.VideoCapture = None):
         self.window = window
         self.window.title("TTScout")
 
@@ -99,7 +108,7 @@ class CameraApp:
         self.snapshot_button = tk.Button(self.window, text="Take Snapshot", command=self.take_snapshot)
         self.snapshot_button.pack(side=tk.BOTTOM, padx=10, pady=10)
 
-        self.cap = get_capture_device(0)
+        self.cap = device if device is not None else get_capture_device(0)
         if self.cap is None:
             exit(1)
 
@@ -286,6 +295,7 @@ class CameraApp:
 
         return None
 
+    # noinspection PyMethodMayBeStatic
     def contour_edges(self, image: np.ndarray) -> np.ndarray | None:
         grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(grayscale, (5, 5), 0)
@@ -334,11 +344,12 @@ class CameraApp:
 
     # def approximate_paper_rect(self):
 
-    def locate_bubbles(self, grayscale: np.ndarray):
+    def detect_bubbles(self, grayscale: np.ndarray):
         clahe: cv2.CLAHE = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         equalized_img = clahe.apply(grayscale)
 
         # TODO: make like all of this better
+        # this is all like unused as of right now
         ret, threshold = cv2.threshold(
             equalized_img, np.median(equalized_img), 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
         )
@@ -415,13 +426,12 @@ class CameraApp:
                 # self.show_preview()
                 raw, grayscale = self.contour_edges(self.snapshot_frame)
                 corrected = self.orientation_correction(grayscale)
-                self.locate_bubbles(
+                self.detect_bubbles(
                     cv2.resize(corrected, dsize=CameraApp.PROCESSING_DIM, interpolation=cv2.INTER_LANCZOS4)
                 )
 
     def confirm_preview(self):
         self.preview_window.withdraw()
-        # TODO save to csv
 
     def retry_preview(self):
         self.preview_window.withdraw()
@@ -439,6 +449,9 @@ class CameraApp:
 
 class FormSetupApp(CameraApp):
     JSON_PATH = "../data.json"
+
+    PREVIEW_TARGET_FPS = 30
+    _PREVIEW_TARGET_SPF = 1 / PREVIEW_TARGET_FPS
 
     class JsonSerializable:
         _cant_serialize = {}  # identity dict for cases where serialization can't be done
@@ -507,6 +520,8 @@ class FormSetupApp(CameraApp):
             if not self.is_tk:
                 raise RuntimeError("IllegalState! Cannot invoke _delete_tk_widgets when not is_tk")
 
+            self.is_tk = False
+
             self.bubble_frame.destroy()
             self.bubble_name.destroy()
             self.bubble_bounding_box.destroy()
@@ -519,10 +534,10 @@ class FormSetupApp(CameraApp):
             if not self.is_tk:
                 raise RuntimeError("IllegalState! Cannot invoke update_bounding_box when not is_tk")
 
-            self.bubble_bounding_box["state"] = "normal"
+            self.bubble_bounding_box["state"] = CameraApp._TK_TEXT_NORMAL
             self.bubble_bounding_box.delete("1.0", "1.end")
             self.bubble_bounding_box.insert("1.0", str(bounding_box))
-            self.bubble_bounding_box["state"] = "disabled"
+            self.bubble_bounding_box["state"] = CameraApp._TK_TEXT_DISABLED
 
             self._set_bounding_box(*bounding_box)
 
@@ -540,25 +555,33 @@ class FormSetupApp(CameraApp):
 
             bubble_bounding_box = tk.Text(bubble_frame, width=40, height=1)
             bubble_bounding_box.insert("1.0", bounding_box_str)
-            bubble_bounding_box["state"] = "disabled"
+            bubble_bounding_box["state"] = FormSetupApp._TK_TEXT_NORMAL
             bubble_bounding_box.pack(side=tk.TOP)
 
             return bubble_frame, bubble_name, bubble_bounding_box
 
-        def tk_repr(self, container_frame: tk.Frame):
+        def tk_repr(self,
+                    container_frame: tk.Frame,
+                    make_editable: bool = False,
+                    selection_callback: str | Callable[[FormSetupApp.Bubble], Any] = None):
             bubble_frame, bubble_name, bubble_bounding_box = FormSetupApp.Bubble._make_tk_repr(
                 container_frame,
                 self.name,
                 f"({self.rect_x}, {self.rect_y}, {self.rect_x + self.rect_w}, {self.rect_y + self.rect_h})"
             )
 
-            # disable editing bubble name when making tk_repr instead of adding a new bubble
-            bubble_name["state"] = "disabled"
+            # disable editing bubble name when making tk_repr instead of adding a new bubble by default
+            bubble_name["state"] = FormSetupApp._TK_TEXT_NORMAL if make_editable else FormSetupApp._TK_TEXT_DISABLED
 
-            self._set_tk_props(bubble_frame, bubble_name, bubble_bounding_box)
+            select_bubble_button = None
+            if make_editable and selection_callback is not None:
+                select_bubble_button = tk.Button(bubble_frame, text="Select", command=lambda: selection_callback(self))
+                select_bubble_button.pack(side=tk.RIGHT)
+
+            self._set_tk_props(bubble_frame, bubble_name, bubble_bounding_box, select_bubble_button)
 
         @classmethod
-        def from_tk(cls, settings_frame: tk.Frame, selection_callback: str | Callable[[FormSetupApp.Bubble], Any]):
+        def from_tk(cls,  settings_frame: tk.Frame, selection_callback: str | Callable[[FormSetupApp.Bubble], Any]):
             inst = cls("Enter Bubble Name Here...", 0, 0, 0, 0)
 
             bubble_frame, bubble_name, bubble_bounding_box = cls._make_tk_repr(
@@ -581,8 +604,9 @@ class FormSetupApp(CameraApp):
                      question_frame: tk.Frame = None,
                      question_name: tk.Text = None,
                      bubbles_frame: tk.Frame = None,
-                     delete_button_frame: tk.Frame = None,
-                     delete_button: tk.Button = None):
+                     buttons_frame: tk.Frame = None,
+                     delete_button: tk.Button = None,
+                     edit_button: tk.Button = None):
             self.name = name
             self.bubbles = bubbles
 
@@ -590,8 +614,9 @@ class FormSetupApp(CameraApp):
             self.question_frame: tk.Frame | None = question_frame
             self.question_name: tk.Text | None = question_name
             self.bubbles_frame: tk.Frame | None = bubbles_frame
-            self.delete_button_frame: tk.Frame | None = delete_button_frame
+            self.buttons_frame: tk.Frame | None = buttons_frame
             self.delete_button: tk.Button | None = delete_button
+            self.edit_button: tk.Button | None = edit_button
 
         def __repr__(self):
             return f"Question(name={self.name}, bubbles={self.bubbles})"
@@ -600,15 +625,17 @@ class FormSetupApp(CameraApp):
                           question_frame: tk.Frame,
                           question_name: tk.Text,
                           bubbles_frame: tk.Frame,
-                          delete_button_frame: tk.Frame,
-                          delete_button: tk.Button):
+                          buttons_frame: tk.Frame,
+                          delete_button: tk.Button = None,
+                          edit_button: tk.Button = None):
             self.is_tk = True
 
             self.question_frame = question_frame
             self.question_name = question_name
             self.bubbles_frame = bubbles_frame
-            self.delete_button_frame = delete_button_frame
+            self.buttons_frame = buttons_frame
             self.delete_button = delete_button
+            self.edit_button = edit_button
 
         def delete_tk_widgets(self):
             if not self.is_tk:
@@ -617,51 +644,98 @@ class FormSetupApp(CameraApp):
             for bubble in self.bubbles:
                 bubble.delete_tk_widgets()
 
+            self.is_tk = False
+
             self.question_frame.destroy()
             self.question_name.destroy()
             self.bubbles_frame.destroy()
-            self.delete_button_frame.destroy()
-            self.delete_button.destroy()
+            self.buttons_frame.destroy()
+
+            if self.delete_button is not None:
+                self.delete_button.destroy()
+
+            if self.edit_button is not None:
+                self.edit_button.destroy()
 
         def _delete_question(self, name: str, deletion_callback: Callable[[str], Any]):
             self.delete_tk_widgets()
             deletion_callback(name)
 
+        def update_question(self, name: str = None, bubbles: [FormSetupApp.Bubble] = None):
+            name = name if name is not None else self.name
+            bubbles = bubbles if bubbles is not None else self.bubbles
+
+            self.name = name
+            self.bubbles = bubbles
+
+            original_state = self.question_name["state"]
+
+            # make the question name writable then change it back to its original state
+            self.question_name["state"] = FormSetupApp._TK_TEXT_NORMAL
+            self.question_name.delete("1.0", "1.end")
+            self.question_name.insert("1.0", name)
+            self.question_name["state"] = original_state
+
+            clear_widget(self.bubbles_frame)
+            for bubble in bubbles:
+                bubble.tk_repr(self.bubbles_frame)
+
         @classmethod
         def _make_tk_repr(cls,
                           parent_frame: tk.Frame,
                           name: str,
-                          bubbles: [FormSetupApp.Bubble]):
+                          bubbles: [FormSetupApp.Bubble],
+                          pad_bubbles: bool = False):
             question_frame = tk.Frame(parent_frame)
             question_frame.pack(side=tk.TOP)
 
             question_name = tk.Text(question_frame, width=40, height=1)
             question_name.insert("1.0", name)
-            question_name["state"] = "disabled"
+            question_name["state"] = FormSetupApp._TK_TEXT_DISABLED
             question_name.pack(side=tk.TOP)
 
             bubbles_frame = tk.Frame(question_frame)
             bubbles_frame.pack(side=tk.RIGHT)
 
-            delete_button_frame = tk.Frame(question_frame)
-            delete_button_frame.pack(side=tk.LEFT)
+            buttons_frame = tk.Frame(question_frame)
+            if pad_bubbles:
+                buttons_frame.pack(side=tk.LEFT, padx=10)
+            else:
+                buttons_frame.pack(side=tk.LEFT)
 
             for bubble in bubbles:
                 bubble.tk_repr(bubbles_frame)
 
-            return question_frame, question_name, bubbles_frame, delete_button_frame
+            return question_frame, question_name, bubbles_frame, buttons_frame
 
-        def tk_repr(self, container_frame: tk.Frame, deletion_callback: str | Callable[[str], Any]):
-            question_frame, question_name, bubbles_frame, delete_button_frame = self._make_tk_repr(
-                container_frame, self.name, self.bubbles
+        def tk_repr(self,
+                    container_frame: tk.Frame,
+                    deletion_callback: str | Callable[[str], Any] = None,
+                    edit_callback: str | Callable[[str, [FormSetupApp.Bubble]], Any] = None):
+            edit_button, delete_button = None, None
+            is_edit, is_delete = edit_callback is not None, deletion_callback is not None
+
+            question_frame, question_name, bubbles_frame, buttons_frame = self._make_tk_repr(
+                container_frame, self.name, self.bubbles, not is_edit and not is_delete
             )
 
-            delete_button = tk.Button(
-                delete_button_frame, text="Delete", command=lambda: self._delete_question(self.name, deletion_callback)
-            )
-            delete_button.pack(side=tk.RIGHT)
+            if is_edit:
+                edit_button = tk.Button(
+                    buttons_frame, text="Edit", command=lambda: edit_callback(self.name, self.bubbles)
+                )
+                edit_button.pack(side=tk.TOP)
 
-            self._set_tk_props(question_frame, question_name, bubbles_frame, delete_button_frame, delete_button)
+            if is_delete:
+                delete_button = tk.Button(
+                    buttons_frame, text="Delete", command=lambda: self._delete_question(self.name, deletion_callback)
+                )
+                delete_button.pack(side=tk.BOTTOM)
+
+            if self.is_tk:
+                # make sure to clean up past tk widgets if we were already existing in the tk space
+                self.delete_tk_widgets()
+
+            self._set_tk_props(question_frame, question_name, bubbles_frame, buttons_frame, delete_button, edit_button)
 
         @classmethod
         def from_json(cls, input_json: dict):
@@ -686,8 +760,8 @@ class FormSetupApp(CameraApp):
 
             return cls(input_json.get("name"), questions)
 
-    def __init__(self, window: tk.Tk):
-        super().__init__(window)
+    def __init__(self, window: tk.Tk, device: cv2.VideoCapture = None):
+        super().__init__(window, device)
         try:
             with open(FormSetupApp.JSON_PATH, "r") as input_json:
                 self.data = FormSetupApp.Data.from_json(json.loads(input_json.read()))
@@ -711,6 +785,7 @@ class FormSetupApp(CameraApp):
 
         self.setup_image: np.ndarray | None = None
         self.settings_frame: tk.Frame | None = None
+        self.shown_bubbles_scroll_frame: ScrollFrame | None = None
 
         self.shown_questions_container: tk.Frame | None = None
         self.shown_questions_scroll_frame: ScrollFrame | None = None
@@ -718,7 +793,15 @@ class FormSetupApp(CameraApp):
 
     def display_question(self, question: Question):
         if self.shown_questions_scroll_frame is not None:
-            question.tk_repr(self.shown_questions_scroll_frame.viewPort, lambda n: self.remove_question(n))
+            question.tk_repr(
+                self.shown_questions_scroll_frame.viewPort,
+                lambda n: self.remove_question(n),
+                lambda n, b: self.make_question_settings_window(n, b, is_update=True)
+            )
+
+    def update_question(self, question: Question, name: str, bubbles: [Bubble]):
+        if self.shown_questions_scroll_frame is not None:
+            question.update_question(name, bubbles)
 
     def add_question(self, question: str, bubbles: [Bubble]):
         existing_question = self.get_question(question)
@@ -803,9 +886,16 @@ class FormSetupApp(CameraApp):
         self.setup_image = None
 
     def add_question_btn_callback(self):
+        if self.settings_frame is not None:
+            self.close_question_settings_window_callback()
+
         self.make_question_settings_window()
 
-    def make_question_settings_window(self):
+    def make_question_settings_window(
+            self,
+            name: str = "Enter Question Name Here...",
+            bubbles: [Bubble] = None,
+            is_update: bool = False):
         self.question_settings_window.protocol("WM_DELETE_WINDOW", self.close_question_settings_window_callback)
 
         # Deiconify/Show the window
@@ -815,34 +905,63 @@ class FormSetupApp(CameraApp):
         self.settings_frame = tk.Frame(self.question_settings_window)
         self.settings_frame.pack(side=tk.TOP, padx=10, pady=10)
 
+        self.shown_bubbles_scroll_frame = ScrollFrame(self.settings_frame)
+        self.shown_bubbles_scroll_frame.pack(side=tk.BOTTOM, fill="both", expand=True)
+
         question_name = tk.Text(self.settings_frame, width=40, height=1)
-        question_name.insert("1.0", "Enter Question Name Here...")
+        question_name.insert("1.0", name)
         question_name.pack(side=tk.TOP)
 
         add_bubble_button = tk.Button(self.settings_frame, text="Add Bubble", command=self.add_bubble_btn_callback)
         add_bubble_button.pack(side=tk.LEFT)
 
+        if bubbles is not None:
+            for bubble in bubbles:
+                self.curr_question_setting_bubbles.append(bubble)
+                bubble.tk_repr(
+                    self.shown_bubbles_scroll_frame.viewPort,
+                    make_editable=True,
+                    selection_callback=lambda b=bubble: self.make_canvas_window(
+                        Image.fromarray(self.setup_image),
+                        b, dims=CameraApp.PROCESSING_DIM
+                    )
+                )
+
         confirm_button = tk.Button(
             self.question_settings_window,
             text="Confirm",
             command=lambda: self.close_question_settings_window_callback(
-                question_name.get("1.0", "1.end"), self.curr_question_setting_bubbles
+                question_name.get("1.0", "1.end"), self.curr_question_setting_bubbles, is_update, name
             )
         )
         confirm_button.pack(side=tk.RIGHT)
 
+        cancel_button = tk.Button(
+            self.question_settings_window, text="Cancel", command=self.close_question_settings_window_callback
+        )
+        cancel_button.pack(side=tk.LEFT)
+
     def add_bubble_btn_callback(self):
-        bubble = FormSetupApp.Bubble.from_tk(self.settings_frame, self.select_bubble_btn_callback)
+        bubble = FormSetupApp.Bubble.from_tk(self.shown_bubbles_scroll_frame.viewPort, self.select_bubble_btn_callback)
         self.curr_question_setting_bubbles.append(bubble)
 
-    def close_question_settings_window_callback(self, question_name: str = None, question_bubbles: [Bubble] = None):
+    def close_question_settings_window_callback(
+            self,
+            question_name: str = None,
+            question_bubbles: [Bubble] = None,
+            is_update: bool = False,
+            previous_name: str = None):
         if question_name is not None and question_bubbles is not None:
             copied_bubbles = question_bubbles.copy()  # need to make a copy here, so it doesn't get gc 'ed early
             for bubble in copied_bubbles:
                 bubble.update_name()
 
-            question = FormSetupApp.Question(question_name, copied_bubbles)
-            self.add_question_direct(question)
+            if not is_update:
+                question = FormSetupApp.Question(question_name, copied_bubbles)
+                self.add_question_direct(question)
+            else:
+                question = self.get_question(previous_name)
+                self.update_question(question, question_name, copied_bubbles)
 
         self.curr_question_setting_bubbles.clear()
 
@@ -877,8 +996,13 @@ class FormSetupApp(CameraApp):
 
         preview_text = tk.Text(preview_frame, width=40, height=1)
         preview_text.insert("1.0", "No Data Yet...")
-        preview_text["state"] = "disabled"
+        preview_text["state"] = FormSetupApp._TK_TEXT_DISABLED
         preview_text.pack(side=tk.LEFT)
+
+        rect_text = tk.Text(preview_frame, width=40, height=1)
+        rect_text.insert("1.0", "No Data Yet...")
+        rect_text["state"] = FormSetupApp._TK_TEXT_DISABLED
+        rect_text.pack(side=tk.LEFT)
 
         _baseline_percent = 100 * CameraApp.BUBBLE_DETECTION_BASELINE
 
@@ -887,8 +1011,9 @@ class FormSetupApp(CameraApp):
                 cropped_img = crop(img, self.setup_canvas.rect_absolute)
 
                 tk_img = ImageTk.PhotoImage(cropped_img)
-                preview_label.config(image=tk_img)
-                preview_label.image = tk_img
+                if preview_label.winfo_exists() == 1:
+                    preview_label.config(image=tk_img)
+                    preview_label.image = tk_img
 
                 rect_x0, rect_y0, rect_x1, rect_y1 = self.setup_canvas.rect_absolute
                 extracted_img: np.ndarray = img_mat[rect_y0:rect_y1, rect_x0:rect_x1]
@@ -897,12 +1022,19 @@ class FormSetupApp(CameraApp):
                 n_white_px = np.count_nonzero(extracted_img)
                 prop_white = n_white_px / n_px
 
-                preview_text["state"] = "normal"
-                preview_text.delete("1.0", "1.end")
-                preview_text.insert("1.0", f"{(100 * prop_white):3.3f}% white; baseline={_baseline_percent}")
-                preview_text["state"] = "disabled"
+                if preview_text.winfo_exists() == 1:
+                    preview_text["state"] = FormSetupApp._TK_TEXT_NORMAL
+                    preview_text.delete("1.0", "1.end")
+                    preview_text.insert("1.0", f"{(100 * prop_white):3.3f}% white; baseline={_baseline_percent}")
+                    preview_text["state"] = FormSetupApp._TK_TEXT_DISABLED
 
-                time.sleep(0.1)
+                if rect_text.winfo_exists() == 1:
+                    rect_text["state"] = FormSetupApp._TK_TEXT_NORMAL
+                    rect_text.delete("1.0", "1.end")
+                    rect_text.insert("1.0", f"({rect_x0}, {rect_y0}, {rect_x1}, {rect_y1})")
+                    rect_text["state"] = FormSetupApp._TK_TEXT_DISABLED
+
+                time.sleep(FormSetupApp._PREVIEW_TARGET_SPF)
 
         self.canvas_preview_update = True
         self.canvas_preview_update_thread = threading.Thread(target=update_preview)
@@ -910,6 +1042,11 @@ class FormSetupApp(CameraApp):
 
         self.setup_canvas.create_image(0.5 * photo_width, 0.5 * photo_height, image=photo)
         self.setup_canvas.image = photo  # Keep reference to avoid garbage collection
+
+        if bubble.rect_w != 0 and bubble.rect_h != 0:
+            self.setup_canvas.set_rect_pos(
+                (bubble.rect_x, bubble.rect_y, bubble.rect_x + bubble.rect_w, bubble.rect_y + bubble.rect_h)
+            )
 
         self.setup_canvas.config(width=photo_width, height=photo_height)
 
@@ -927,7 +1064,6 @@ class FormSetupApp(CameraApp):
         clear_widget(self.canvas_container_window, exclude=self.setup_canvas)
 
     def confirm_canvas_callback(self, bubble: Bubble):
-        print(self.setup_canvas.rect_absolute)
         bubble.update_bounding_box(self.setup_canvas.rect_absolute)
 
         self.canvas_preview_update = False
@@ -944,8 +1080,117 @@ class FormSetupApp(CameraApp):
 
 
 class CaptureResponsesApp(CameraApp):
-    def __init__(self, window: tk.Tk):
-        super().__init__(window)
+    CENTER_COMPLETENESS_THRESHOLD = 0.8
+    CENTER_COMPLETENESS_WIDE_BLANK_THRESHOLD = 0.2
+
+    MONO_REGION_ALTERNATIVE_AREA_THRESHOLD = 25
+
+    RESULT_DISPLAY_DIM = (640, 480)
+
+    OUTPUT_FILE_PATH = "../output.csv"
+
+    class QuestionDetection:
+        def __init__(self, question: FormSetupApp.Question, detections: list[bool]):
+            self.question = question
+            self.detections = detections
+
+            self.bubbles = dict(zip(question.bubbles, detections))
+            self.tk_container: tk.Frame | None = None
+
+        def __repr__(self):
+            return f"QuestionDetection(" \
+                   f"question={self.question}," \
+                   f"detections={self.detections})"
+
+        def tk_repr(self, parent_frame: tk.Frame):
+            primary_container = tk.Frame(parent_frame)
+
+            question_container = tk.Frame(primary_container)
+            question_container.pack(side=tk.LEFT)
+
+            result_container = tk.Frame(primary_container)
+            result_container.pack(side=tk.RIGHT)
+
+            detection_result_texts = []
+            for detection in self.detections:
+                detection_result_text = tk.Text(result_container, width=40, height=1)
+                detection_result_text.insert("1.0", "Yes" if detection else "No")
+                detection_result_text["state"] = CaptureResponsesApp._TK_TEXT_DISABLED
+                detection_result_text.pack(side=tk.TOP, pady=10)
+
+                detection_result_texts.append(detection_result_text)
+
+            primary_container.pack(side=tk.TOP)
+
+            self.question.tk_repr(question_container)
+            self.tk_container = primary_container
+
+    class FieldPosition(enum.Enum):
+        BlueOne = "Blue 1"
+        BlueTwo = "Blue 2"
+        BlueThree = "Blue 3"
+
+        RedOne = "Red 1"
+        RedTwo = "Red 2"
+        RedThree = "Red 3"
+
+    class OutputHeaders(enum.Enum):
+        Match = "Match #"
+        Team = "Team #"
+        Position = "Position"
+        Scouter = "Scouter"
+        Question = "Question"
+        Bubble = "Bubble"
+        Value = "Value"
+
+        @classmethod
+        def get_headers(cls):
+            return [e.value for e in cls]
+
+    class Output:
+
+        def __init__(self, output_file_path: str):
+            self.output_file_path = output_file_path
+            self.headers = CaptureResponsesApp.OutputHeaders.get_headers()
+            self.data = []
+
+        def give_detection(self,
+                           match: int,
+                           team: int,
+                           position: CaptureResponsesApp.FieldPosition,
+                           scouter: str,
+                           detections: list[CaptureResponsesApp.QuestionDetection]):
+
+            output_headers = CaptureResponsesApp.OutputHeaders
+            for detection in detections:
+                for bubble, detected in detection.bubbles.items():
+                    self.data.append({
+                        output_headers.Match.value: str(match),
+                        output_headers.Team.value: str(team),
+                        output_headers.Position.value: position.value,
+                        output_headers.Scouter.value: scouter,
+                        output_headers.Question.value: detection.question.name,
+                        output_headers.Bubble.value: bubble.name,
+                        output_headers.Value.value: detected
+                    })
+
+        def write(self):
+            if len(self.data) <= 0:
+                # don't write anything if we don't have any data, no need to just write headers
+                return
+
+            already_exists = os.path.isfile(self.output_file_path)
+
+            with open(self.output_file_path, "w" if not already_exists else "a", newline="") as output_file:
+                csv_writer = csv.DictWriter(output_file, fieldnames=self.headers)
+                if not already_exists:
+                    csv_writer.writeheader()
+
+                for row in self.data:
+                    csv_writer.writerow(row)
+
+    def __init__(self, window: tk.Tk, device: cv2.VideoCapture = None):
+        super().__init__(window, device)
         try:
             with open(FormSetupApp.JSON_PATH, "r") as input_json:
                 self.data = FormSetupApp.Data.from_json(json.loads(input_json.read()))
@@ -954,13 +1199,42 @@ class CaptureResponsesApp(CameraApp):
         except EnvironmentError as environ_err:
             raise RuntimeError(environ_err)
 
+        self.responses_window = tk.Toplevel(self.window)
+        self.responses_window.withdraw()
+
+        self.responses_container: tk.Frame | None = None
+        self.responses_image_container: tk.Frame | None = None
+
+        self.held_detections: list[CaptureResponsesApp.QuestionDetection] | None = None
+
+        self.output = CaptureResponsesApp.Output(CaptureResponsesApp.OUTPUT_FILE_PATH)
+
+        self.scouter_name_text: tk.Text | None = None
+        self.match_number_text: tk.Text | None = None
+        self.team_number_text: tk.Text | None = None
+        self.position_dropdown_var: tk.StringVar | None = None
+
+        self.held_settings: dict[CaptureResponsesApp.OutputHeaders, str] | None = None
+
     @classmethod
     def check_bubble_center_completeness(cls, bubble: np.ndarray):
+        row_regions = []
+        widest_blanks = []
         for row in bubble:
-            if len(consecutive(row, step_size=0)) > 3:
-                return False
+            regions = consecutive(row, step_size=0)
+            blank_regions = [region for region in regions if all(n == 0 for n in region)]
+            widest_blank = max(map(len, blank_regions)) if len(blank_regions) > 0 else 0
 
-        return True
+            row_regions.append(regions)
+            widest_blanks.append(widest_blank)
+
+        center_complete = sum(len(region) <= 3 for region in row_regions)
+        total_rows, total_cols = bubble.shape
+
+        average_widest_blank = np.mean(widest_blanks)
+
+        return ((center_complete / total_rows) >= CaptureResponsesApp.CENTER_COMPLETENESS_THRESHOLD)\
+            or ((average_widest_blank / total_cols) <= CaptureResponsesApp.CENTER_COMPLETENESS_WIDE_BLANK_THRESHOLD)
 
     @classmethod
     def check_bubble_mono_contour(cls, bubble: np.ndarray):
@@ -977,14 +1251,29 @@ class CaptureResponsesApp(CameraApp):
     @classmethod
     def check_bubble_mono_region(cls, bubble: np.ndarray):
         labeled, n_labels = ndi.label(bubble)
-        return n_labels <= 1
+        if n_labels <= 1:
+            return True
 
-    def locate_bubbles(self, grayscale: np.ndarray):
+        region_areas = []
+        for i in range(1, n_labels + 1):
+            region_areas.append(len(labeled[labeled == i]))
+
+        threshold = CaptureResponsesApp.MONO_REGION_ALTERNATIVE_AREA_THRESHOLD
+
+        max_area = max(region_areas)
+        primary = max_area > threshold
+        remaining = all(area <= threshold for area in region_areas if area != max_area)
+
+        return primary and remaining
+
+    def detect_bubbles(self, grayscale: np.ndarray):
         threshold = self.process_snapshot(grayscale)
-        disp_copy = cv2.cvtColor(threshold.copy(), cv2.COLOR_GRAY2RGB)
+        # disp_copy = cv2.cvtColor(threshold.copy(), cv2.COLOR_GRAY2RGB)
 
-        marked_bubbles = []
+        marked_bubbles_by_question = []
         for question in self.data.questions:
+            marked_bubbles = []
+
             for bubble in question.bubbles:
                 rect_x0, rect_y0 = bubble.rect_x, bubble.rect_y
                 rect_x1, rect_y1 = rect_x0 + bubble.rect_w, rect_y0 + bubble.rect_h
@@ -993,12 +1282,12 @@ class CaptureResponsesApp(CameraApp):
                 # cv2.rectangle(disp_copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.GREEN.rgb)
                 # cv2.circle(copy, (int(circle_x), int(circle_y)), int(radius), Color.RED.rgb)
 
-                flat_nonzero = np.flatnonzero(extracted_img) % bubble.rect_w
-                if len(flat_nonzero) > 0:
-                    leftmost_y = np.min(flat_nonzero)
-                    rightmost_y = np.max(flat_nonzero)
-
-                    # print(f"ly: {leftmost_y}, ry: {rightmost_y}")
+                # flat_nonzero = np.flatnonzero(extracted_img) % bubble.rect_w
+                # if len(flat_nonzero) > 0:
+                #     leftmost_y = np.min(flat_nonzero)
+                #     rightmost_y = np.max(flat_nonzero)
+                #
+                #     print(f"ly: {leftmost_y}, ry: {rightmost_y}")
 
                 center_completeness = CaptureResponsesApp.check_bubble_center_completeness(extracted_img)
                 mono_contour = CaptureResponsesApp.check_bubble_mono_contour(extracted_img)
@@ -1016,17 +1305,213 @@ class CaptureResponsesApp(CameraApp):
                 #       f"wp: {white_px_prop_above_baseline}, "
                 #       f"mr: {mono_region}")
                 #
-                # print(f"{question.name}:{bubble.name}="
-                #       f"{meets_all_conditions}")
+                print(f"{question.name}:{bubble.name}="
+                      f"{meets_all_conditions}")
 
-                if meets_all_conditions:
-                    cv2.rectangle(disp_copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.GREEN.rgb)
-                    marked_bubbles.append(meets_all_conditions)
-                else:
-                    cv2.rectangle(disp_copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.RED.rgb)
+                # if meets_all_conditions:
+                #     cv2.rectangle(disp_copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.GREEN.rgb)
+                # else:
+                #     cv2.rectangle(disp_copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.RED.rgb)
 
-        self.img_window([Image.fromarray(disp_copy)], dims=CameraApp.PROCESSING_DIM)
+                marked_bubbles.append(meets_all_conditions)
+
+            marked_bubbles_by_question.append(marked_bubbles)
+
+        # self.img_window([Image.fromarray(disp_copy)], dims=CameraApp.PROCESSING_DIM)
         # self.img_window([Image.fromarray(shadow_filtered_image)], dims=CameraApp.PROCESSING_DIM)
+
+        return threshold, self.data.questions, marked_bubbles_by_question
+
+    def take_snapshot(self):
+        ret, frame = self.cap.read()
+
+        if ret:
+            self.snapshot_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            self.clear_preview()
+            if self.snapshot_frame is not None:
+                raw, grayscale = self.contour_edges(self.snapshot_frame)
+                corrected = self.orientation_correction(grayscale)
+
+                threshold, questions, marked_bubbles = self.detect_bubbles(
+                    cv2.resize(corrected, dsize=CameraApp.PROCESSING_DIM, interpolation=cv2.INTER_LANCZOS4)
+                )
+
+                self.process_detection_results(threshold, raw, questions, marked_bubbles)
+
+    def close_displayed_detection(self):
+        self.responses_window.withdraw()
+
+        if self.held_detections is not None:
+            for detection in self.held_detections:
+                detection.question.delete_tk_widgets()
+
+            self.held_detections = None
+
+        self.held_settings = {
+            CaptureResponsesApp.OutputHeaders.Scouter: self.scouter_name_text.get("1.0", "1.end"),
+            CaptureResponsesApp.OutputHeaders.Match: self.match_number_text.get("1.0", "1.end"),
+            CaptureResponsesApp.OutputHeaders.Team: self.team_number_text.get("1.0", "1.end"),
+            CaptureResponsesApp.OutputHeaders.Position: self.position_dropdown_var.get(),
+        }
+
+        clear_widget(self.responses_window)
+
+        self.responses_image_container = None
+        self.match_number_text = None
+        self.position_dropdown_var = None
+
+    @classmethod
+    def make_text_entry(cls, parent_frame: tk.Frame, label_name: str, default_value: str):
+        label_text = tk.Text(parent_frame, width=10, height=1)
+        label_text.insert("1.0", label_name)
+        label_text["state"] = CaptureResponsesApp._TK_TEXT_DISABLED
+
+        text = tk.Text(parent_frame, width=10, height=1)
+        text.insert("1.0", default_value)
+
+        return label_text, text
+
+    def display_detection_image(self, threshold: np.ndarray, detections: list[CaptureResponsesApp.QuestionDetection]):
+        self.responses_window.protocol("WM_DELETE_WINDOW", self.close_displayed_detection)
+
+        self.responses_image_container = tk.Frame(self.responses_window)
+        self.responses_image_container.pack(side=tk.LEFT, padx=10, pady=10)
+
+        detection_setup_container = tk.Frame(self.responses_window)
+        detection_text_container = ScrollFrame(self.responses_window, width=480, height=480)
+
+        if self.held_settings is not None:
+            scouter = self.held_settings.get(CaptureResponsesApp.OutputHeaders.Scouter)
+            match_number = self.held_settings.get(CaptureResponsesApp.OutputHeaders.Match)
+            position = self.held_settings.get(CaptureResponsesApp.OutputHeaders.Position)
+            team = self.held_settings.get(CaptureResponsesApp.OutputHeaders.Team)
+        else:
+            scouter = "Harry"
+            match_number = "0"
+            _random_field_position: CaptureResponsesApp.FieldPosition = random.choice(
+                list(CaptureResponsesApp.FieldPosition)
+            )
+
+            position = _random_field_position.name
+            team = "1683"
+
+        scouter_name_frame = tk.Frame(detection_setup_container)
+        scouter_name_label_text, scouter_name_text = CaptureResponsesApp.make_text_entry(
+            scouter_name_frame, CaptureResponsesApp.OutputHeaders.Scouter.value, scouter
+        )
+
+        match_number_frame = tk.Frame(detection_setup_container)
+        match_number_label_text, match_number_text = CaptureResponsesApp.make_text_entry(
+            match_number_frame, CaptureResponsesApp.OutputHeaders.Match.value, match_number
+        )
+
+        team_number_frame = tk.Frame(detection_setup_container)
+        team_number_label_text, team_number_text = CaptureResponsesApp.make_text_entry(
+            team_number_frame, CaptureResponsesApp.OutputHeaders.Team.value, team
+        )
+
+        scouter_name_label_text.pack(side=tk.LEFT)
+        scouter_name_text.pack(side=tk.RIGHT)
+        scouter_name_frame.pack(side=tk.TOP)
+
+        match_number_label_text.pack(side=tk.LEFT)
+        match_number_text.pack(side=tk.RIGHT)
+        match_number_frame.pack(side=tk.TOP)
+
+        team_number_label_text.pack(side=tk.LEFT)
+        team_number_text.pack(side=tk.RIGHT)
+        team_number_frame.pack(side=tk.TOP)
+
+        position_frame = tk.Frame(detection_setup_container)
+        position_str_var = tk.StringVar(position_frame)
+        position_str_var.set(position)
+
+        position_label_text = tk.Text(position_frame, width=10, height=1)
+        position_label_text.insert("1.0", "Position")
+        position_label_text["state"] = CaptureResponsesApp._TK_TEXT_DISABLED
+
+        position_dropdown = tk.OptionMenu(
+            position_frame, position_str_var, *[pos.name for pos in CaptureResponsesApp.FieldPosition if pos != position]
+        )
+
+        position_label_text.pack(side=tk.LEFT)
+        position_dropdown.pack(side=tk.RIGHT)
+        position_frame.pack(side=tk.TOP)
+
+        detection_setup_container.pack(side=tk.TOP)
+
+        self.scouter_name_text = scouter_name_text
+        self.match_number_text = match_number_text
+        self.team_number_text = team_number_text
+        self.position_dropdown_var = position_str_var
+
+        threshold_copy = cv2.cvtColor(threshold.copy(), cv2.COLOR_GRAY2RGB)
+        for detection in detections:
+            detection.tk_repr(detection_text_container.viewPort)
+
+            for bubble, detected in detection.bubbles.items():
+                cv2.rectangle(
+                    threshold_copy,
+                    (bubble.rect_x, bubble.rect_y),
+                    (bubble.rect_x + bubble.rect_w, bubble.rect_y + bubble.rect_h),
+                    Color.GREEN.rgb if detected else Color.RED.rgb
+                )
+
+        detection_text_container.pack(side=tk.TOP)
+
+        threshold_image = Image.fromarray(threshold_copy)
+        resized_threshold = threshold_image.resize(CaptureResponsesApp.RESULT_DISPLAY_DIM, Image.LANCZOS)
+        photo = ImageTk.PhotoImage(resized_threshold)
+
+        if self.responses_window.winfo_exists():
+            self.responses_window.deiconify()
+
+        image_label = tk.Label(self.responses_image_container, image=photo)
+        image_label.image = photo  # Keep reference to avoid garbage collection
+        image_label.pack(side=tk.TOP)
+
+        confirm_button = tk.Button(self.responses_image_container, text="Confirm", command=self.confirm_preview)
+        confirm_button.pack(side=tk.LEFT)
+
+        retry_button = tk.Button(self.responses_image_container, text="Retry", command=self.retry_preview)
+        retry_button.pack(side=tk.RIGHT)
+
+    def confirm_preview(self):
+        if self.held_detections is not None:
+            self.output.give_detection(
+                match=int(self.match_number_text.get("1.0", "1.end")),
+                team=int(self.team_number_text.get("1.0", "1.end")),
+                position=CaptureResponsesApp.FieldPosition[self.position_dropdown_var.get()],
+                scouter=self.scouter_name_text.get("1.0", "1.end"),
+                detections=self.held_detections
+            )
+        else:
+            warnings.warn("self.held_detections was None when attempting to save data!")
+
+        # make sure to only close AFTER we call give_detection that way self.held_detections doesn't get set to None
+        self.close_displayed_detection()
+
+    def retry_preview(self):
+        self.close_displayed_detection()
+
+    def process_detection_results(self,
+                                  threshold: np.ndarray,
+                                  raw: np.ndarray,
+                                  questions: [FormSetupApp.Question],
+                                  detections: list[list[bool]]):
+        question_detections: [CaptureResponsesApp.QuestionDetection] = [
+            CaptureResponsesApp.QuestionDetection(questions[i], detections[i]) for i in range(len(questions))
+        ]
+
+        if self.held_detections is not None:
+            raise RuntimeError("cannot start another process_detection_results when one is already held!")
+
+        self.held_detections = question_detections.copy()
+        self.display_detection_image(threshold, question_detections)
+
+    def close(self):
+        super().close()
+        self.output.write()
 
 
 class SelectionMenuApp:
@@ -1053,7 +1538,7 @@ class SelectionMenuApp:
 
         self.selected_mode = None
 
-        self.instance = None
+        self.instance: CameraApp | FormSetupApp | CaptureResponsesApp | None = None
 
         self.capture_devices = []
         for capture_id in range(SelectionMenuApp.MAX_SUPPORTED_CAPTURE_DEVICES):
@@ -1068,10 +1553,10 @@ class SelectionMenuApp:
 
         for i in range(len(self.capture_devices)):
             stream_label = tk.Label(self.video_frame)
-            stream_label.pack()
+            stream_label.pack(side=tk.TOP)
 
-            select_camera_button = tk.Button(self.window, text="Select", command=lambda: self.select_camera(i))
-            select_camera_button.pack(side=tk.BOTTOM, padx=10, pady=10)
+            select_camera_button = tk.Button(self.video_frame, text="Select", command=lambda: self.select_camera(i))
+            select_camera_button.pack(side=tk.RIGHT, padx=10, pady=10)
 
             self.select_camera_buttons.append(select_camera_button)
             self.video_stream_labels.append(stream_label)
@@ -1115,13 +1600,13 @@ class SelectionMenuApp:
         self.close(window_keepalive=True)
 
         if self.selected_mode == SelectionMenuApp.Mode.Camera:
-            self.instance = CameraApp(self.window)
+            self.instance = CameraApp(self.window, self.selected_camera)
             self.instance.update_stream()
         elif self.selected_mode == SelectionMenuApp.Mode.FormSetup:
-            self.instance = FormSetupApp(self.window)
+            self.instance = FormSetupApp(self.window, self.selected_camera)
             self.instance.update_stream()
         elif self.selected_mode == SelectionMenuApp.Mode.CaptureResponses:
-            self.instance = CaptureResponsesApp(self.window)
+            self.instance = CaptureResponsesApp(self.window, self.selected_camera)
             self.instance.update_stream()
         else:
             raise ValueError("Invalid mode passed to select_mode!")
@@ -1152,10 +1637,15 @@ class SelectionMenuApp:
 
     def close(self, window_keepalive=False):
         for device in self.capture_devices:
+            if window_keepalive and device == self.selected_camera:
+                continue
+
             device.release()
 
         if window_keepalive:
             return
+        elif self.instance is not None:
+            self.instance.close()
 
         try:
             self.window.destroy()

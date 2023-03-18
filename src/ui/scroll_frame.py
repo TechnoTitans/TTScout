@@ -13,14 +13,15 @@ import platform
 # ************************
 # noinspection PyUnusedLocal
 class ScrollFrame(tk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent)  # create a frame (self)
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)  # create a frame (self)
 
-        self.canvas = tk.Canvas(self, borderwidth=0, background="#ffffff")  # place canvas on self
+        self.canvas = tk.Canvas(self, borderwidth=0, background="#ffffff", *args, **kwargs)  # place canvas on self
         # place a frame on the canvas, this frame will hold the child widgets
-        self.viewPort = tk.Frame(self.canvas, background="#ffffff")
+        self.viewPort = tk.Frame(self.canvas, background="#ffffff", *args, **kwargs)
         self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)  # place a scrollbar on self
-        self.canvas.configure(yscrollcommand=self.vsb.set)  # attach scrollbar action to scroll of canvas
+        # attach scrollbar action to scroll of canvas
+        self.canvas.configure(yscrollcommand=self.vsb.set, *args, **kwargs)
 
         self.vsb.pack(side="right", fill="y")  # pack scrollbar to right of self
         self.canvas.pack(side="left", fill="both", expand=True)  # pack canvas to left of self and expand to fil
