@@ -1089,6 +1089,8 @@ class CaptureResponsesApp(CameraApp):
 
     OUTPUT_FILE_PATH = "../output.csv"
 
+    INTERACTION_BOUND_ACTION = "<Button-1>"
+
     class QuestionDetection:
         def __init__(self, question: FormSetupApp.Question, detections: list[bool]):
             self.question = question
@@ -1096,6 +1098,8 @@ class CaptureResponsesApp(CameraApp):
 
             self.bubbles = dict(zip(question.bubbles, detections))
             self.tk_container: tk.Frame | None = None
+
+            self.detection_result_texts: dict[FormSetupApp.Bubble, tk.Text] | None = None
 
         def __repr__(self):
             return f"QuestionDetection(" \
@@ -1111,19 +1115,31 @@ class CaptureResponsesApp(CameraApp):
             result_container = tk.Frame(primary_container)
             result_container.pack(side=tk.RIGHT)
 
-            detection_result_texts = []
-            for detection in self.detections:
+            detection_result_texts = {}
+            for bubble, detection in self.bubbles.items():
                 detection_result_text = tk.Text(result_container, width=40, height=1)
                 detection_result_text.insert("1.0", "Yes" if detection else "No")
                 detection_result_text["state"] = CaptureResponsesApp._TK_TEXT_DISABLED
                 detection_result_text.pack(side=tk.TOP, pady=10)
 
-                detection_result_texts.append(detection_result_text)
+                detection_result_texts[bubble] = detection_result_text
 
             primary_container.pack(side=tk.TOP)
 
             self.question.tk_repr(question_container)
             self.tk_container = primary_container
+            self.detection_result_texts = detection_result_texts
+
+        def update_detection(self, detection_map: dict[FormSetupApp.Bubble, bool] = None):
+            detection_map = detection_map if detection_map is not None else self.bubbles
+            for bubble, detection in detection_map.items():
+                result_text = self.detection_result_texts.get(bubble, None)
+                if result_text is not None:
+                    original_state = result_text["state"]
+                    result_text["state"] = CaptureResponsesApp._TK_TEXT_NORMAL
+                    result_text.delete("1.0", "1.end")
+                    result_text.insert("1.0", "Yes" if detection else "No")
+                    result_text["state"] = original_state
 
     class FieldPosition(enum.Enum):
         BlueOne = "Blue 1"
@@ -1215,6 +1231,11 @@ class CaptureResponsesApp(CameraApp):
         self.position_dropdown_var: tk.StringVar | None = None
 
         self.held_settings: dict[CaptureResponsesApp.OutputHeaders, str] | None = None
+        self.held_detection_interaction_frames: dict[FormSetupApp.Bubble, tk.Frame] | None = None
+        self.held_detection_interaction_bindings: dict[FormSetupApp.Bubble, str] | None = None
+
+        self.held_detection_threshold: np.ndarray | None = None
+        self.detection_img_label: tk.Label | None = None
 
     @classmethod
     def check_bubble_center_completeness(cls, bubble: np.ndarray):
@@ -1347,6 +1368,19 @@ class CaptureResponsesApp(CameraApp):
 
             self.held_detections = None
 
+        if self.held_detection_interaction_bindings is not None and self.held_detection_interaction_frames is not None:
+            for bubble, bound_name in self.held_detection_interaction_bindings.items():
+                frame = self.held_detection_interaction_frames.get(bubble, None)
+                if frame is not None:
+                    frame.unbind(CaptureResponsesApp.INTERACTION_BOUND_ACTION, bound_name)
+
+            # only destroy the frames and set reference to None after we unbind using data from this dict
+            for frame in self.held_detection_interaction_frames.values():
+                frame.destroy()
+
+            self.held_detection_interaction_bindings = None
+            self.held_detection_interaction_frames = None
+
         self.held_settings = {
             CaptureResponsesApp.OutputHeaders.Scouter: self.scouter_name_text.get("1.0", "1.end"),
             CaptureResponsesApp.OutputHeaders.Match: self.match_number_text.get("1.0", "1.end"),
@@ -1355,6 +1389,9 @@ class CaptureResponsesApp(CameraApp):
         }
 
         clear_widget(self.responses_window)
+
+        self.held_detection_threshold = None
+        self.detection_img_label = None
 
         self.responses_image_container = None
         self.match_number_text = None
@@ -1370,6 +1407,29 @@ class CaptureResponsesApp(CameraApp):
         text.insert("1.0", default_value)
 
         return label_text, text
+
+    def update_detection(self, detection: QuestionDetection, bubble: FormSetupApp.Bubble, detected: bool):
+        if self.held_detection_threshold is not None:
+            threshold_copy = self.held_detection_threshold.copy()
+
+            for next_bubble, next_detected in detection.bubbles.items():
+                color_detect_val = next_detected if next_bubble != bubble else detected
+                cv2.rectangle(
+                    threshold_copy,
+                    (next_bubble.rect_x, next_bubble.rect_y),
+                    (next_bubble.rect_x + next_bubble.rect_w, next_bubble.rect_y + next_bubble.rect_h),
+                    (Color.GREEN.rgb if color_detect_val else Color.RED.rgb)
+                )
+
+            threshold_image = Image.fromarray(threshold_copy)
+            resized_threshold = threshold_image.resize(CaptureResponsesApp.RESULT_DISPLAY_DIM, Image.LANCZOS)
+            photo = ImageTk.PhotoImage(resized_threshold)
+
+            if self.detection_img_label is not None:
+                self.detection_img_label.config(image=photo)
+                self.detection_img_label.image = photo
+
+        detection.update_detection({bubble: detected})
 
     def display_detection_image(self, threshold: np.ndarray, detections: list[CaptureResponsesApp.QuestionDetection]):
         self.responses_window.protocol("WM_DELETE_WINDOW", self.close_displayed_detection)
@@ -1445,11 +1505,30 @@ class CaptureResponsesApp(CameraApp):
         self.team_number_text = team_number_text
         self.position_dropdown_var = position_str_var
 
+        if self.held_detection_interaction_frames is None:
+            self.held_detection_interaction_frames = {}
+
+        if self.held_detection_interaction_bindings is None:
+            self.held_detection_interaction_bindings = {}
+
         threshold_copy = cv2.cvtColor(threshold.copy(), cv2.COLOR_GRAY2RGB)
+        self.held_detection_threshold = threshold
+
         for detection in detections:
             detection.tk_repr(detection_text_container.viewPort)
 
             for bubble, detected in detection.bubbles.items():
+                interaction_frame = tk.Frame(self.responses_image_container)
+                interaction_frame.place(
+                    x=bubble.rect_x, y=bubble.rect_y, width=bubble.rect_w, height=bubble.rect_h, anchor=tk.NW
+                )
+                bound_name = interaction_frame.bind(
+                    CaptureResponsesApp.INTERACTION_BOUND_ACTION,
+                    lambda dtn=detection, b=bubble, dtd=detected: self.update_detection(
+                        detection=dtn, bubble=b, detected=not detected
+                    )
+                )
+
                 cv2.rectangle(
                     threshold_copy,
                     (bubble.rect_x, bubble.rect_y),
@@ -1469,6 +1548,7 @@ class CaptureResponsesApp(CameraApp):
         image_label = tk.Label(self.responses_image_container, image=photo)
         image_label.image = photo  # Keep reference to avoid garbage collection
         image_label.pack(side=tk.TOP)
+        self.detection_img_label = image_label
 
         confirm_button = tk.Button(self.responses_image_container, text="Confirm", command=self.confirm_preview)
         confirm_button.pack(side=tk.LEFT)
