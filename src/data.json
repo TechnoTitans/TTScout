@@ -11,8 +11,8 @@
                     "name": "Success",
                     "rect_h": 12,
                     "rect_w": 17,
-                    "rect_x": 81,
-                    "rect_y": 82,
+                    "rect_x": 87,
+                    "rect_y": 90,
                     "select_bubble_button": null
                 },
                 {
@@ -23,19 +23,19 @@
                     "name": "DNA",
                     "rect_h": 8,
                     "rect_w": 17,
-                    "rect_x": 101,
-                    "rect_y": 85,
+                    "rect_x": 106,
+                    "rect_y": 92,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "AutoMobility",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -47,8 +47,8 @@
                     "name": "Success",
                     "rect_h": 11,
                     "rect_w": 20,
-                    "rect_x": 73,
-                    "rect_y": 99,
+                    "rect_x": 81,
+                    "rect_y": 106,
                     "select_bubble_button": null
                 },
                 {
@@ -59,19 +59,19 @@
                     "name": "DNA",
                     "rect_h": 10,
                     "rect_w": 18,
-                    "rect_x": 95,
-                    "rect_y": 99,
+                    "rect_x": 101,
+                    "rect_y": 106,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "AutoDocked",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -83,8 +83,8 @@
                     "name": "Success",
                     "rect_h": 9,
                     "rect_w": 19,
-                    "rect_x": 80,
-                    "rect_y": 116,
+                    "rect_x": 87,
+                    "rect_y": 121,
                     "select_bubble_button": null
                 },
                 {
@@ -95,19 +95,19 @@
                     "name": "DNA",
                     "rect_h": 10,
                     "rect_w": 19,
-                    "rect_x": 101,
-                    "rect_y": 115,
+                    "rect_x": 107,
+                    "rect_y": 121,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "AutoEngaged",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -117,45 +117,21 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Success",
-                    "rect_h": 15,
-                    "rect_w": 16,
-                    "rect_x": 136,
-                    "rect_y": 224,
+                    "rect_h": 12,
+                    "rect_w": 15,
+                    "rect_x": 93,
+                    "rect_y": 249,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
-            "name": "TeleopDefensePlayed",
-            "question_frame": null,
-            "question_name": null
-        },
-        {
-            "bubbles": [
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "Success",
-                    "rect_h": 15,
-                    "rect_w": 16,
-                    "rect_x": 151,
-                    "rect_y": 238,
-                    "select_bubble_button": null
-                }
-            ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
-            "name": "TeleopDefenseReceived",
-            "question_frame": null,
-            "question_name": null
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
+            "name": "TeleopPancake",
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -165,10 +141,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "1",
-                    "rect_h": 14,
-                    "rect_w": 20,
-                    "rect_x": 420,
-                    "rect_y": 248,
+                    "rect_h": 9,
+                    "rect_w": 18,
+                    "rect_x": 414,
+                    "rect_y": 251,
                     "select_bubble_button": null
                 },
                 {
@@ -177,10 +153,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "2",
-                    "rect_h": 11,
-                    "rect_w": 17,
-                    "rect_x": 444,
-                    "rect_y": 250,
+                    "rect_h": 8,
+                    "rect_w": 18,
+                    "rect_x": 435,
+                    "rect_y": 252,
                     "select_bubble_button": null
                 },
                 {
@@ -189,10 +165,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "3",
-                    "rect_h": 12,
+                    "rect_h": 9,
                     "rect_w": 16,
-                    "rect_x": 466,
-                    "rect_y": 249,
+                    "rect_x": 457,
+                    "rect_y": 251,
                     "select_bubble_button": null
                 },
                 {
@@ -201,10 +177,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "4",
-                    "rect_h": 11,
-                    "rect_w": 16,
-                    "rect_x": 488,
-                    "rect_y": 250,
+                    "rect_h": 9,
+                    "rect_w": 14,
+                    "rect_x": 479,
+                    "rect_y": 251,
                     "select_bubble_button": null
                 },
                 {
@@ -213,21 +189,21 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "5",
-                    "rect_h": 9,
+                    "rect_h": 8,
                     "rect_w": 16,
-                    "rect_x": 510,
+                    "rect_x": 499,
                     "rect_y": 251,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "TeleopDriverQuality",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -237,9 +213,9 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "1",
-                    "rect_h": 11,
-                    "rect_w": 17,
-                    "rect_x": 456,
+                    "rect_h": 9,
+                    "rect_w": 16,
+                    "rect_x": 463,
                     "rect_y": 268,
                     "select_bubble_button": null
                 },
@@ -251,8 +227,8 @@
                     "name": "2",
                     "rect_h": 9,
                     "rect_w": 18,
-                    "rect_x": 477,
-                    "rect_y": 269,
+                    "rect_x": 483,
+                    "rect_y": 268,
                     "select_bubble_button": null
                 },
                 {
@@ -261,9 +237,9 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "3",
-                    "rect_h": 11,
-                    "rect_w": 16,
-                    "rect_x": 500,
+                    "rect_h": 9,
+                    "rect_w": 15,
+                    "rect_x": 505,
                     "rect_y": 268,
                     "select_bubble_button": null
                 },
@@ -275,8 +251,8 @@
                     "name": "4",
                     "rect_h": 9,
                     "rect_w": 16,
-                    "rect_x": 521,
-                    "rect_y": 269,
+                    "rect_x": 525,
+                    "rect_y": 268,
                     "select_bubble_button": null
                 },
                 {
@@ -285,21 +261,21 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "5",
-                    "rect_h": 11,
+                    "rect_h": 10,
                     "rect_w": 15,
-                    "rect_x": 543,
+                    "rect_x": 547,
                     "rect_y": 268,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
-            "name": "TeleopMechanicalQuality",
-            "question_frame": null,
-            "question_name": null
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
+            "name": "TeleopMechanicalReliability",
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -309,45 +285,45 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Success",
-                    "rect_h": 15,
-                    "rect_w": 16,
-                    "rect_x": 109,
-                    "rect_y": 252,
-                    "select_bubble_button": null
-                }
-            ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
-            "name": "TeleopDisqualified",
-            "question_frame": null,
-            "question_name": null
-        },
-        {
-            "bubbles": [
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "Success",
-                    "rect_h": 13,
+                    "rect_h": 9,
                     "rect_w": 17,
-                    "rect_x": 200,
-                    "rect_y": 267,
+                    "rect_x": 106,
+                    "rect_y": 227,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
+            "name": "TeleopDisqualified",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 9,
+                    "rect_w": 15,
+                    "rect_x": 190,
+                    "rect_y": 239,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "TeleopHPInteraction",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -359,8 +335,8 @@
                     "name": "Cone_1",
                     "rect_h": 15,
                     "rect_w": 26,
-                    "rect_x": 179,
-                    "rect_y": 76,
+                    "rect_x": 181,
+                    "rect_y": 82,
                     "select_bubble_button": null
                 },
                 {
@@ -372,7 +348,7 @@
                     "rect_h": 15,
                     "rect_w": 28,
                     "rect_x": 228,
-                    "rect_y": 72,
+                    "rect_y": 78,
                     "select_bubble_button": null
                 },
                 {
@@ -381,10 +357,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Cone_3",
-                    "rect_h": 14,
+                    "rect_h": 15,
                     "rect_w": 26,
-                    "rect_x": 279,
-                    "rect_y": 77,
+                    "rect_x": 277,
+                    "rect_y": 83,
                     "select_bubble_button": null
                 },
                 {
@@ -395,8 +371,8 @@
                     "name": "Cone_4",
                     "rect_h": 15,
                     "rect_w": 26,
-                    "rect_x": 328,
-                    "rect_y": 76,
+                    "rect_x": 325,
+                    "rect_y": 83,
                     "select_bubble_button": null
                 },
                 {
@@ -407,8 +383,8 @@
                     "name": "Cube_5",
                     "rect_h": 15,
                     "rect_w": 26,
-                    "rect_x": 374,
-                    "rect_y": 72,
+                    "rect_x": 369,
+                    "rect_y": 79,
                     "select_bubble_button": null
                 },
                 {
@@ -419,8 +395,8 @@
                     "name": "Cone_6",
                     "rect_h": 14,
                     "rect_w": 27,
-                    "rect_x": 424,
-                    "rect_y": 76,
+                    "rect_x": 417,
+                    "rect_y": 83,
                     "select_bubble_button": null
                 },
                 {
@@ -431,8 +407,8 @@
                     "name": "Cone_7",
                     "rect_h": 13,
                     "rect_w": 26,
-                    "rect_x": 475,
-                    "rect_y": 77,
+                    "rect_x": 466,
+                    "rect_y": 84,
                     "select_bubble_button": null
                 },
                 {
@@ -443,8 +419,8 @@
                     "name": "Cube_8",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 526,
-                    "rect_y": 72,
+                    "rect_x": 515,
+                    "rect_y": 79,
                     "select_bubble_button": null
                 },
                 {
@@ -455,19 +431,19 @@
                     "name": "Cone_9",
                     "rect_h": 14,
                     "rect_w": 23,
-                    "rect_x": 577,
-                    "rect_y": 76,
+                    "rect_x": 563,
+                    "rect_y": 84,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "AutoHighNode",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -479,8 +455,8 @@
                     "name": "Cone_1",
                     "rect_h": 13,
                     "rect_w": 26,
-                    "rect_x": 180,
-                    "rect_y": 102,
+                    "rect_x": 183,
+                    "rect_y": 107,
                     "select_bubble_button": null
                 },
                 {
@@ -492,7 +468,7 @@
                     "rect_h": 16,
                     "rect_w": 26,
                     "rect_x": 229,
-                    "rect_y": 98,
+                    "rect_y": 103,
                     "select_bubble_button": null
                 },
                 {
@@ -503,8 +479,8 @@
                     "name": "Cone_3",
                     "rect_h": 16,
                     "rect_w": 26,
-                    "rect_x": 279,
-                    "rect_y": 100,
+                    "rect_x": 277,
+                    "rect_y": 104,
                     "select_bubble_button": null
                 },
                 {
@@ -515,8 +491,8 @@
                     "name": "Cone_4",
                     "rect_h": 13,
                     "rect_w": 26,
-                    "rect_x": 328,
-                    "rect_y": 102,
+                    "rect_x": 324,
+                    "rect_y": 107,
                     "select_bubble_button": null
                 },
                 {
@@ -527,8 +503,8 @@
                     "name": "Cube_5",
                     "rect_h": 17,
                     "rect_w": 29,
-                    "rect_x": 374,
-                    "rect_y": 96,
+                    "rect_x": 368,
+                    "rect_y": 103,
                     "select_bubble_button": null
                 },
                 {
@@ -537,10 +513,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Cone_6",
-                    "rect_h": 16,
+                    "rect_h": 14,
                     "rect_w": 28,
-                    "rect_x": 424,
-                    "rect_y": 99,
+                    "rect_x": 416,
+                    "rect_y": 107,
                     "select_bubble_button": null
                 },
                 {
@@ -551,8 +527,8 @@
                     "name": "Cone_7",
                     "rect_h": 14,
                     "rect_w": 25,
-                    "rect_x": 476,
-                    "rect_y": 101,
+                    "rect_x": 466,
+                    "rect_y": 107,
                     "select_bubble_button": null
                 },
                 {
@@ -563,8 +539,8 @@
                     "name": "Cube_8",
                     "rect_h": 16,
                     "rect_w": 26,
-                    "rect_x": 525,
-                    "rect_y": 97,
+                    "rect_x": 513,
+                    "rect_y": 103,
                     "select_bubble_button": null
                 },
                 {
@@ -575,19 +551,19 @@
                     "name": "Cone_9",
                     "rect_h": 15,
                     "rect_w": 27,
-                    "rect_x": 576,
-                    "rect_y": 99,
+                    "rect_x": 561,
+                    "rect_y": 106,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "AutoMidNode",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -599,8 +575,8 @@
                     "name": "Cube_1",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 168,
-                    "rect_y": 121,
+                    "rect_x": 170,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -611,8 +587,8 @@
                     "name": "Cone_1",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 189,
-                    "rect_y": 121,
+                    "rect_x": 190,
+                    "rect_y": 125,
                     "select_bubble_button": null
                 },
                 {
@@ -623,8 +599,8 @@
                     "name": "Cube_2",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 222,
-                    "rect_y": 121,
+                    "rect_x": 221,
+                    "rect_y": 125,
                     "select_bubble_button": null
                 },
                 {
@@ -635,8 +611,8 @@
                     "name": "Cone_2",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 243,
-                    "rect_y": 121,
+                    "rect_x": 242,
+                    "rect_y": 125,
                     "select_bubble_button": null
                 },
                 {
@@ -647,8 +623,8 @@
                     "name": "Cube_3",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 274,
-                    "rect_y": 121,
+                    "rect_x": 270,
+                    "rect_y": 125,
                     "select_bubble_button": null
                 },
                 {
@@ -659,8 +635,8 @@
                     "name": "Cone_3",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 293,
-                    "rect_y": 121,
+                    "rect_x": 290,
+                    "rect_y": 125,
                     "select_bubble_button": null
                 },
                 {
@@ -671,8 +647,8 @@
                     "name": "Cube_4",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 322,
-                    "rect_y": 121,
+                    "rect_x": 318,
+                    "rect_y": 125,
                     "select_bubble_button": null
                 },
                 {
@@ -683,8 +659,8 @@
                     "name": "Cone_4",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 343,
-                    "rect_y": 121,
+                    "rect_x": 337,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -695,8 +671,8 @@
                     "name": "Cube_5",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 369,
-                    "rect_y": 120,
+                    "rect_x": 363,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -707,8 +683,8 @@
                     "name": "Cone_5",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 390,
-                    "rect_y": 120,
+                    "rect_x": 383,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -719,8 +695,8 @@
                     "name": "Cube_6",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 420,
-                    "rect_y": 120,
+                    "rect_x": 411,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -731,8 +707,8 @@
                     "name": "Cone_6",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 441,
-                    "rect_y": 120,
+                    "rect_x": 431,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -743,8 +719,8 @@
                     "name": "Cube_7",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 469,
-                    "rect_y": 120,
+                    "rect_x": 458,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -755,8 +731,8 @@
                     "name": "Cone_7",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 490,
-                    "rect_y": 120,
+                    "rect_x": 478,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -767,8 +743,8 @@
                     "name": "Cube_8",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 520,
-                    "rect_y": 120,
+                    "rect_x": 507,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -779,8 +755,8 @@
                     "name": "Cone_8",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 541,
-                    "rect_y": 120,
+                    "rect_x": 527,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -791,8 +767,8 @@
                     "name": "Cube_9",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 576,
-                    "rect_y": 120,
+                    "rect_x": 560,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 },
                 {
@@ -803,19 +779,19 @@
                     "name": "Cone_9",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 597,
-                    "rect_y": 119,
+                    "rect_x": 580,
+                    "rect_y": 126,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "AutoLowNode",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -827,8 +803,8 @@
                     "name": "Cone_1",
                     "rect_h": 15,
                     "rect_w": 23,
-                    "rect_x": 133,
-                    "rect_y": 168,
+                    "rect_x": 136,
+                    "rect_y": 171,
                     "select_bubble_button": null
                 },
                 {
@@ -839,8 +815,8 @@
                     "name": "Cube_2",
                     "rect_h": 15,
                     "rect_w": 23,
-                    "rect_x": 178,
-                    "rect_y": 163,
+                    "rect_x": 179,
+                    "rect_y": 167,
                     "select_bubble_button": null
                 },
                 {
@@ -851,8 +827,8 @@
                     "name": "Cone_3",
                     "rect_h": 15,
                     "rect_w": 23,
-                    "rect_x": 224,
-                    "rect_y": 168,
+                    "rect_x": 223,
+                    "rect_y": 171,
                     "select_bubble_button": null
                 },
                 {
@@ -863,8 +839,8 @@
                     "name": "Cone_4",
                     "rect_h": 15,
                     "rect_w": 23,
-                    "rect_x": 269,
-                    "rect_y": 167,
+                    "rect_x": 265,
+                    "rect_y": 170,
                     "select_bubble_button": null
                 },
                 {
@@ -875,8 +851,8 @@
                     "name": "Cube_5",
                     "rect_h": 15,
                     "rect_w": 23,
-                    "rect_x": 311,
-                    "rect_y": 163,
+                    "rect_x": 306,
+                    "rect_y": 167,
                     "select_bubble_button": null
                 },
                 {
@@ -887,8 +863,8 @@
                     "name": "Cone_6",
                     "rect_h": 15,
                     "rect_w": 23,
-                    "rect_x": 356,
-                    "rect_y": 166,
+                    "rect_x": 350,
+                    "rect_y": 170,
                     "select_bubble_button": null
                 },
                 {
@@ -899,8 +875,8 @@
                     "name": "Cone_7",
                     "rect_h": 15,
                     "rect_w": 23,
-                    "rect_x": 402,
-                    "rect_y": 167,
+                    "rect_x": 394,
+                    "rect_y": 171,
                     "select_bubble_button": null
                 },
                 {
@@ -911,8 +887,8 @@
                     "name": "Cube_8",
                     "rect_h": 15,
                     "rect_w": 23,
-                    "rect_x": 448,
-                    "rect_y": 162,
+                    "rect_x": 437,
+                    "rect_y": 167,
                     "select_bubble_button": null
                 },
                 {
@@ -923,19 +899,19 @@
                     "name": "Cone_9",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 493,
-                    "rect_y": 167,
+                    "rect_x": 480,
+                    "rect_y": 171,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "TeleopHighNode",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -947,8 +923,8 @@
                     "name": "Cone_1",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 134,
-                    "rect_y": 190,
+                    "rect_x": 137,
+                    "rect_y": 192,
                     "select_bubble_button": null
                 },
                 {
@@ -959,8 +935,8 @@
                     "name": "Cube_2",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 178,
-                    "rect_y": 189,
+                    "rect_x": 179,
+                    "rect_y": 191,
                     "select_bubble_button": null
                 },
                 {
@@ -972,7 +948,7 @@
                     "rect_h": 14,
                     "rect_w": 24,
                     "rect_x": 223,
-                    "rect_y": 190,
+                    "rect_y": 192,
                     "select_bubble_button": null
                 },
                 {
@@ -983,8 +959,8 @@
                     "name": "Cone_4",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 268,
-                    "rect_y": 190,
+                    "rect_x": 265,
+                    "rect_y": 192,
                     "select_bubble_button": null
                 },
                 {
@@ -995,8 +971,8 @@
                     "name": "Cube_5",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 311,
-                    "rect_y": 187,
+                    "rect_x": 306,
+                    "rect_y": 189,
                     "select_bubble_button": null
                 },
                 {
@@ -1007,8 +983,8 @@
                     "name": "Cone_6",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 356,
-                    "rect_y": 190,
+                    "rect_x": 349,
+                    "rect_y": 192,
                     "select_bubble_button": null
                 },
                 {
@@ -1019,8 +995,8 @@
                     "name": "Cone_7",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 402,
-                    "rect_y": 189,
+                    "rect_x": 393,
+                    "rect_y": 192,
                     "select_bubble_button": null
                 },
                 {
@@ -1031,8 +1007,8 @@
                     "name": "Cube_8",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 447,
-                    "rect_y": 187,
+                    "rect_x": 437,
+                    "rect_y": 190,
                     "select_bubble_button": null
                 },
                 {
@@ -1043,19 +1019,19 @@
                     "name": "Cone_9",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 494,
-                    "rect_y": 189,
+                    "rect_x": 481,
+                    "rect_y": 192,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "TeleopMidNode",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -1067,8 +1043,8 @@
                     "name": "Cube_1",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 122,
-                    "rect_y": 210,
+                    "rect_x": 125,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1079,8 +1055,8 @@
                     "name": "Cone_1",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 141,
-                    "rect_y": 210,
+                    "rect_x": 144,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1091,8 +1067,8 @@
                     "name": "Cube_2",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 171,
-                    "rect_y": 209,
+                    "rect_x": 172,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1103,8 +1079,8 @@
                     "name": "Cone_2",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 189,
-                    "rect_y": 209,
+                    "rect_x": 190,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1115,8 +1091,8 @@
                     "name": "Cube_3",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 217,
-                    "rect_y": 209,
+                    "rect_x": 216,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1127,8 +1103,8 @@
                     "name": "Cone_3",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 235,
-                    "rect_y": 209,
+                    "rect_x": 234,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1139,8 +1115,8 @@
                     "name": "Cube_4",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 262,
-                    "rect_y": 209,
+                    "rect_x": 259,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1151,8 +1127,8 @@
                     "name": "Cone_4",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 280,
-                    "rect_y": 209,
+                    "rect_x": 277,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1163,8 +1139,8 @@
                     "name": "Cube_5",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 305,
-                    "rect_y": 209,
+                    "rect_x": 300,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1175,8 +1151,8 @@
                     "name": "Cone_5",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 323,
-                    "rect_y": 209,
+                    "rect_x": 318,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1187,8 +1163,8 @@
                     "name": "Cube_6",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 350,
-                    "rect_y": 209,
+                    "rect_x": 344,
+                    "rect_y": 210,
                     "select_bubble_button": null
                 },
                 {
@@ -1197,10 +1173,10 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Cone_6",
-                    "rect_h": 11,
-                    "rect_w": 19,
-                    "rect_x": 369,
-                    "rect_y": 209,
+                    "rect_h": 12,
+                    "rect_w": 18,
+                    "rect_x": 363,
+                    "rect_y": 210,
                     "select_bubble_button": null
                 },
                 {
@@ -1211,8 +1187,8 @@
                     "name": "Cube_7",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 395,
-                    "rect_y": 209,
+                    "rect_x": 386,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1223,8 +1199,8 @@
                     "name": "Cone_7",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 414,
-                    "rect_y": 209,
+                    "rect_x": 405,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1235,8 +1211,8 @@
                     "name": "Cube_8",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 441,
-                    "rect_y": 209,
+                    "rect_x": 431,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1247,8 +1223,8 @@
                     "name": "Cone_8",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 459,
-                    "rect_y": 209,
+                    "rect_x": 449,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1259,8 +1235,8 @@
                     "name": "Cube_9",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 492,
-                    "rect_y": 209,
+                    "rect_x": 479,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 },
                 {
@@ -1271,91 +1247,19 @@
                     "name": "Cone_9",
                     "rect_h": 11,
                     "rect_w": 19,
-                    "rect_x": 511,
-                    "rect_y": 209,
+                    "rect_x": 498,
+                    "rect_y": 211,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "TeleopLowNode",
-            "question_frame": null,
-            "question_name": null
-        },
-        {
-            "bubbles": [
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "Success",
-                    "rect_h": 9,
-                    "rect_w": 16,
-                    "rect_x": 167,
-                    "rect_y": 290,
-                    "select_bubble_button": null
-                },
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "DNA",
-                    "rect_h": 9,
-                    "rect_w": 16,
-                    "rect_x": 189,
-                    "rect_y": 290,
-                    "select_bubble_button": null
-                }
-            ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
-            "name": "EndgameDocked",
-            "question_frame": null,
-            "question_name": null
-        },
-        {
-            "bubbles": [
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "Success",
-                    "rect_h": 9,
-                    "rect_w": 19,
-                    "rect_x": 172,
-                    "rect_y": 303,
-                    "select_bubble_button": null
-                },
-                {
-                    "bubble_bounding_box": {},
-                    "bubble_frame": {},
-                    "bubble_name": {},
-                    "is_tk": true,
-                    "name": "DNA",
-                    "rect_h": 9,
-                    "rect_w": 19,
-                    "rect_x": 193,
-                    "rect_y": 303,
-                    "select_bubble_button": null
-                }
-            ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
-            "name": "EndgameEngaged",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -1366,9 +1270,81 @@
                     "is_tk": true,
                     "name": "Success",
                     "rect_h": 10,
-                    "rect_w": 21,
-                    "rect_x": 143,
-                    "rect_y": 316,
+                    "rect_w": 16,
+                    "rect_x": 169,
+                    "rect_y": 287,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "DNA",
+                    "rect_h": 12,
+                    "rect_w": 17,
+                    "rect_x": 189,
+                    "rect_y": 287,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
+            "name": "EndgameDocked",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 11,
+                    "rect_w": 16,
+                    "rect_x": 175,
+                    "rect_y": 300,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "DNA",
+                    "rect_h": 9,
+                    "rect_w": 19,
+                    "rect_x": 194,
+                    "rect_y": 301,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
+            "name": "EndgameEngaged",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 10,
+                    "rect_w": 19,
+                    "rect_x": 147,
+                    "rect_y": 313,
                     "select_bubble_button": null
                 },
                 {
@@ -1379,19 +1355,19 @@
                     "name": "DNA",
                     "rect_h": 11,
                     "rect_w": 18,
-                    "rect_x": 162,
-                    "rect_y": 315,
+                    "rect_x": 164,
+                    "rect_y": 313,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "EndgamePark",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -1403,19 +1379,19 @@
                     "name": "Success",
                     "rect_h": 11,
                     "rect_w": 18,
-                    "rect_x": 444,
-                    "rect_y": 288,
+                    "rect_x": 434,
+                    "rect_y": 287,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "EndgameBalanceControl",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -1426,20 +1402,20 @@
                     "is_tk": true,
                     "name": "Success",
                     "rect_h": 11,
-                    "rect_w": 18,
-                    "rect_x": 520,
-                    "rect_y": 301,
+                    "rect_w": 17,
+                    "rect_x": 507,
+                    "rect_y": 300,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "EndgameTeamwork",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -1451,19 +1427,19 @@
                     "name": "Success",
                     "rect_h": 11,
                     "rect_w": 18,
-                    "rect_x": 372,
-                    "rect_y": 315,
+                    "rect_x": 365,
+                    "rect_y": 313,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "EndgamePenalties",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -1473,21 +1449,21 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Success",
-                    "rect_h": 6,
-                    "rect_w": 17,
-                    "rect_x": 275,
-                    "rect_y": 402,
+                    "rect_h": 9,
+                    "rect_w": 15,
+                    "rect_x": 273,
+                    "rect_y": 393,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "MiscTippedCones",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -1497,21 +1473,21 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Success",
-                    "rect_h": 6,
+                    "rect_h": 10,
                     "rect_w": 17,
-                    "rect_x": 349,
-                    "rect_y": 420,
+                    "rect_x": 342,
+                    "rect_y": 409,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "MiscAdaptStrategy",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
         },
         {
             "bubbles": [
@@ -1521,21 +1497,93 @@
                     "bubble_name": {},
                     "is_tk": true,
                     "name": "Success",
-                    "rect_h": 6,
-                    "rect_w": 17,
-                    "rect_x": 302,
-                    "rect_y": 435,
+                    "rect_h": 10,
+                    "rect_w": 15,
+                    "rect_x": 299,
+                    "rect_y": 424,
                     "select_bubble_button": null
                 }
             ],
-            "bubbles_frame": null,
-            "buttons_frame": null,
-            "delete_button": null,
-            "edit_button": null,
-            "is_tk": false,
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
             "name": "MiscDropPieces",
-            "question_frame": null,
-            "question_name": null
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "1",
+                    "rect_h": 9,
+                    "rect_w": 15,
+                    "rect_x": 131,
+                    "rect_y": 268,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "2",
+                    "rect_h": 9,
+                    "rect_w": 15,
+                    "rect_x": 152,
+                    "rect_y": 268,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "3",
+                    "rect_h": 9,
+                    "rect_w": 15,
+                    "rect_x": 173,
+                    "rect_y": 268,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "4",
+                    "rect_h": 9,
+                    "rect_w": 15,
+                    "rect_x": 194,
+                    "rect_y": 268,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "5",
+                    "rect_h": 9,
+                    "rect_w": 15,
+                    "rect_x": 215,
+                    "rect_y": 268,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
+            "name": "TeleopDefenseAbility",
+            "question_frame": {},
+            "question_name": {}
         }
     ]
 }

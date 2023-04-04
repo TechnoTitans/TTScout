@@ -78,6 +78,10 @@ def consecutive(data, step_size=1):
     return np.split(data, np.where(np.diff(data) != step_size)[0] + 1)
 
 
+def pt_inside_rect(rx0: int, ry0: int, rx1: int, ry1: int, px: int, py: int) -> bool:
+    return rx0 <= px <= rx1 and ry0 <= py <= ry1
+
+
 class CameraApp:
     PROCESSING_DIM = (640, 480)
     ORIENTATION_TAG_ID = 0
@@ -581,7 +585,7 @@ class FormSetupApp(CameraApp):
             self._set_tk_props(bubble_frame, bubble_name, bubble_bounding_box, select_bubble_button)
 
         @classmethod
-        def from_tk(cls,  settings_frame: tk.Frame, selection_callback: str | Callable[[FormSetupApp.Bubble], Any]):
+        def from_tk(cls, settings_frame: tk.Frame, selection_callback: str | Callable[[FormSetupApp.Bubble], Any]):
             inst = cls("Enter Bubble Name Here...", 0, 0, 0, 0)
 
             bubble_frame, bubble_name, bubble_bounding_box = cls._make_tk_repr(
@@ -1130,9 +1134,10 @@ class CaptureResponsesApp(CameraApp):
             self.tk_container = primary_container
             self.detection_result_texts = detection_result_texts
 
-        def update_detection(self, detection_map: dict[FormSetupApp.Bubble, bool] = None):
-            detection_map = detection_map if detection_map is not None else self.bubbles
-            for bubble, detection in detection_map.items():
+        def update_detection(self, updated_detections: dict[FormSetupApp.Bubble, bool] = None):
+            self.bubbles.update(updated_detections)
+
+            for bubble, detection in self.bubbles.items():
                 result_text = self.detection_result_texts.get(bubble, None)
                 if result_text is not None:
                     original_state = result_text["state"]
@@ -1150,8 +1155,46 @@ class CaptureResponsesApp(CameraApp):
         RedTwo = "Red 2"
         RedThree = "Red 3"
 
+    class MatchType(enum.Enum):
+        Qualification = "Qualification"
+
+        # Double elimination bracket
+        # https://www.firstinspires.org/sites/default/files/uploads/resource_library/frc/game-and-season-info/competition-manual
+        # double_elimination_playoff_communication.pdf
+        # double_elimination_bracket.jpg
+
+        PlayoffsRoundOne = "Playoffs Round 1"
+        PlayoffsRoundTwo = "Playoffs Round 2"
+        PlayoffsRoundThree = "Playoffs Round 3"
+        PlayoffsRoundFour = "Playoffs Round 4"
+        PlayoffsRoundFive = "Playoffs Round 5"
+
+        PlayoffsFinal = "Playoffs Final"
+
+        @classmethod
+        def get_playoffs_type(cls, playoffs_match_n: int) -> CaptureResponsesApp.MatchType:
+            # match 14-16 treated as finals match (best 2 out of 3)
+            if not (1 <= playoffs_match_n <= 16):
+                raise ValueError("playoffs_match_n must be between 1 and 14, inclusive")
+
+            if 1 <= playoffs_match_n <= 4:
+                return cls.PlayoffsRoundOne
+            elif 5 <= playoffs_match_n <= 8:
+                return cls.PlayoffsRoundTwo
+            elif 9 <= playoffs_match_n <= 10:
+                return cls.PlayoffsRoundThree
+            elif 11 <= playoffs_match_n <= 12:
+                return cls.PlayoffsRoundFour
+            elif playoffs_match_n == 13:
+                return cls.PlayoffsRoundFive
+            else:
+                return cls.PlayoffsFinal
+
+
+    # TODO: decide if the MatchType field actually needs to be implemented (mainly just for playoffs scouting)
     class OutputHeaders(enum.Enum):
         Match = "Match #"
+        # MatchType = "MatchType"
         Team = "Team #"
         Position = "Position"
         Scouter = "Scouter"
@@ -1227,15 +1270,29 @@ class CaptureResponsesApp(CameraApp):
 
         self.scouter_name_text: tk.Text | None = None
         self.match_number_text: tk.Text | None = None
+        self.match_type_dropdown_var: tk.StringVar | None = None
         self.team_number_text: tk.Text | None = None
         self.position_dropdown_var: tk.StringVar | None = None
 
         self.held_settings: dict[CaptureResponsesApp.OutputHeaders, str] | None = None
-        self.held_detection_interaction_frames: dict[FormSetupApp.Bubble, tk.Frame] | None = None
-        self.held_detection_interaction_bindings: dict[FormSetupApp.Bubble, str] | None = None
+        self.held_detection_interaction_binding: str | None = None
 
         self.held_detection_threshold: np.ndarray | None = None
         self.detection_img_label: tk.Label | None = None
+
+        # detection: QuestionDetection, bubble: Bubble, detected: bool
+        self.update_detection_arg_map: \
+            dict[
+                FormSetupApp.Bubble,
+                tuple[
+                    CaptureResponsesApp.QuestionDetection,
+                    list[CaptureResponsesApp.QuestionDetection],
+                    FormSetupApp.Bubble,
+                    bool
+                ]
+            ] | None = None
+
+        self.update_detection_rect_map: dict[FormSetupApp.Bubble, tuple[int, int, int, int]] | None = None
 
     @classmethod
     def check_bubble_center_completeness(cls, bubble: np.ndarray):
@@ -1254,7 +1311,7 @@ class CaptureResponsesApp(CameraApp):
 
         average_widest_blank = np.mean(widest_blanks)
 
-        return ((center_complete / total_rows) >= CaptureResponsesApp.CENTER_COMPLETENESS_THRESHOLD)\
+        return ((center_complete / total_rows) >= CaptureResponsesApp.CENTER_COMPLETENESS_THRESHOLD) \
             or ((average_widest_blank / total_cols) <= CaptureResponsesApp.CENTER_COMPLETENESS_WIDE_BLANK_THRESHOLD)
 
     @classmethod
@@ -1368,22 +1425,17 @@ class CaptureResponsesApp(CameraApp):
 
             self.held_detections = None
 
-        if self.held_detection_interaction_bindings is not None and self.held_detection_interaction_frames is not None:
-            for bubble, bound_name in self.held_detection_interaction_bindings.items():
-                frame = self.held_detection_interaction_frames.get(bubble, None)
-                if frame is not None:
-                    frame.unbind(CaptureResponsesApp.INTERACTION_BOUND_ACTION, bound_name)
+        if self.held_detection_interaction_binding is not None:
+            self.detection_img_label.unbind(
+                CaptureResponsesApp.INTERACTION_BOUND_ACTION, self.held_detection_interaction_binding
+            )
 
-            # only destroy the frames and set reference to None after we unbind using data from this dict
-            for frame in self.held_detection_interaction_frames.values():
-                frame.destroy()
-
-            self.held_detection_interaction_bindings = None
-            self.held_detection_interaction_frames = None
+            self.held_detection_interaction_binding = None
 
         self.held_settings = {
             CaptureResponsesApp.OutputHeaders.Scouter: self.scouter_name_text.get("1.0", "1.end"),
             CaptureResponsesApp.OutputHeaders.Match: self.match_number_text.get("1.0", "1.end"),
+            # CaptureResponsesApp.OutputHeaders.MatchType: self.match_type_dropdown_var.get(),
             CaptureResponsesApp.OutputHeaders.Team: self.team_number_text.get("1.0", "1.end"),
             CaptureResponsesApp.OutputHeaders.Position: self.position_dropdown_var.get(),
         }
@@ -1394,7 +1446,10 @@ class CaptureResponsesApp(CameraApp):
         self.detection_img_label = None
 
         self.responses_image_container = None
+        self.scouter_name_text = None
         self.match_number_text = None
+        self.match_type_dropdown_var = None
+        self.team_number_text = None
         self.position_dropdown_var = None
 
     @classmethod
@@ -1408,18 +1463,50 @@ class CaptureResponsesApp(CameraApp):
 
         return label_text, text
 
-    def update_detection(self, detection: QuestionDetection, bubble: FormSetupApp.Bubble, detected: bool):
-        if self.held_detection_threshold is not None:
-            threshold_copy = self.held_detection_threshold.copy()
+    @classmethod
+    def make_dropdown_entry(cls,
+                            detection_setup_container: tk.Frame,
+                            enum_cls: enum.Enum.__class__,
+                            name: str,
+                            default_val: str):
+        frame = tk.Frame(detection_setup_container)
+        str_var = tk.StringVar(frame)
+        str_var.set(default_val)
 
-            for next_bubble, next_detected in detection.bubbles.items():
-                color_detect_val = next_detected if next_bubble != bubble else detected
-                cv2.rectangle(
-                    threshold_copy,
-                    (next_bubble.rect_x, next_bubble.rect_y),
-                    (next_bubble.rect_x + next_bubble.rect_w, next_bubble.rect_y + next_bubble.rect_h),
-                    (Color.GREEN.rgb if color_detect_val else Color.RED.rgb)
-                )
+        label_text = tk.Text(frame, width=10, height=1)
+        label_text.insert("1.0", name)
+        label_text["state"] = CaptureResponsesApp._TK_TEXT_DISABLED
+
+        dropdown = tk.OptionMenu(
+            frame, str_var,
+            *[m_type.name for m_type in enum_cls if m_type != default_val]
+        )
+
+        return frame, str_var, label_text, dropdown
+
+    @classmethod
+    def pack_detection_entry(cls, label_text: tk.Widget, text: tk.Widget, frame: tk.Frame):
+        label_text.pack(side=tk.LEFT)
+        text.pack(side=tk.RIGHT)
+        frame.pack(side=tk.TOP)
+
+    def update_detection(self,
+                         detection: CaptureResponsesApp.QuestionDetection,
+                         detections: list[CaptureResponsesApp.QuestionDetection],
+                         bubble: FormSetupApp.Bubble,
+                         detected: bool):
+        if self.held_detection_threshold is not None:
+            threshold_copy = cv2.cvtColor(self.held_detection_threshold.copy(), cv2.COLOR_GRAY2RGB)
+
+            for next_detection in detections:
+                for next_bubble, next_detected in next_detection.bubbles.items():
+                    color_detect_val = next_detected if next_bubble != bubble else detected
+                    cv2.rectangle(
+                        threshold_copy,
+                        (next_bubble.rect_x, next_bubble.rect_y),
+                        (next_bubble.rect_x + next_bubble.rect_w, next_bubble.rect_y + next_bubble.rect_h),
+                        (Color.GREEN.rgb if color_detect_val else Color.RED.rgb)
+                    )
 
             threshold_image = Image.fromarray(threshold_copy)
             resized_threshold = threshold_image.resize(CaptureResponsesApp.RESULT_DISPLAY_DIM, Image.LANCZOS)
@@ -1429,6 +1516,7 @@ class CaptureResponsesApp(CameraApp):
                 self.detection_img_label.config(image=photo)
                 self.detection_img_label.image = photo
 
+        self.update_detection_arg_map[bubble] = (detection, detections, bubble, not detected)
         detection.update_detection({bubble: detected})
 
     def display_detection_image(self, threshold: np.ndarray, detections: list[CaptureResponsesApp.QuestionDetection]):
@@ -1443,91 +1531,97 @@ class CaptureResponsesApp(CameraApp):
         if self.held_settings is not None:
             scouter = self.held_settings.get(CaptureResponsesApp.OutputHeaders.Scouter)
             match_number = self.held_settings.get(CaptureResponsesApp.OutputHeaders.Match)
+            # match_type = self.held_settings.get(CaptureResponsesApp.OutputHeaders.MatchType)
             position = self.held_settings.get(CaptureResponsesApp.OutputHeaders.Position)
             team = self.held_settings.get(CaptureResponsesApp.OutputHeaders.Team)
         else:
             scouter = "Harry"
             match_number = "0"
+            # _random_match_type: CaptureResponsesApp.MatchType = random.choice(
+            #     list(CaptureResponsesApp.MatchType)
+            # )
+
             _random_field_position: CaptureResponsesApp.FieldPosition = random.choice(
                 list(CaptureResponsesApp.FieldPosition)
             )
 
+            # match_type = _random_match_type.name
             position = _random_field_position.name
             team = "1683"
 
+        # Scouter
         scouter_name_frame = tk.Frame(detection_setup_container)
         scouter_name_label_text, scouter_name_text = CaptureResponsesApp.make_text_entry(
             scouter_name_frame, CaptureResponsesApp.OutputHeaders.Scouter.value, scouter
         )
 
+        # Match #
         match_number_frame = tk.Frame(detection_setup_container)
         match_number_label_text, match_number_text = CaptureResponsesApp.make_text_entry(
             match_number_frame, CaptureResponsesApp.OutputHeaders.Match.value, match_number
         )
 
+        # Team #
         team_number_frame = tk.Frame(detection_setup_container)
         team_number_label_text, team_number_text = CaptureResponsesApp.make_text_entry(
             team_number_frame, CaptureResponsesApp.OutputHeaders.Team.value, team
         )
 
-        scouter_name_label_text.pack(side=tk.LEFT)
-        scouter_name_text.pack(side=tk.RIGHT)
-        scouter_name_frame.pack(side=tk.TOP)
+        # Scouter
+        CaptureResponsesApp.pack_detection_entry(scouter_name_label_text, scouter_name_text, scouter_name_frame)
 
-        match_number_label_text.pack(side=tk.LEFT)
-        match_number_text.pack(side=tk.RIGHT)
-        match_number_frame.pack(side=tk.TOP)
+        # Match #
+        CaptureResponsesApp.pack_detection_entry(match_number_label_text, match_number_text, match_number_frame)
 
-        team_number_label_text.pack(side=tk.LEFT)
-        team_number_text.pack(side=tk.RIGHT)
-        team_number_frame.pack(side=tk.TOP)
+        # MatchType
+        # match_type_frame, match_type_str_var, match_type_label_text, match_type_dropdown = \
+        #     CaptureResponsesApp.make_dropdown_entry(
+        #         detection_setup_container,
+        #         CaptureResponsesApp.MatchType,
+        #         CaptureResponsesApp.OutputHeaders.MatchType.value,
+        #         match_type
+        #     )
+        #
+        # CaptureResponsesApp.pack_detection_entry(match_type_label_text, match_type_dropdown, match_type_frame)
 
-        position_frame = tk.Frame(detection_setup_container)
-        position_str_var = tk.StringVar(position_frame)
-        position_str_var.set(position)
+        # Team #
+        CaptureResponsesApp.pack_detection_entry(team_number_label_text, team_number_text, team_number_frame)
 
-        position_label_text = tk.Text(position_frame, width=10, height=1)
-        position_label_text.insert("1.0", "Position")
-        position_label_text["state"] = CaptureResponsesApp._TK_TEXT_DISABLED
+        # Position
+        position_frame, position_str_var, position_label_text, position_dropdown = \
+            CaptureResponsesApp.make_dropdown_entry(
+                detection_setup_container,
+                CaptureResponsesApp.FieldPosition,
+                CaptureResponsesApp.OutputHeaders.Position.value,
+                position
+            )
 
-        position_dropdown = tk.OptionMenu(
-            position_frame, position_str_var, *[pos.name for pos in CaptureResponsesApp.FieldPosition if pos != position]
-        )
-
-        position_label_text.pack(side=tk.LEFT)
-        position_dropdown.pack(side=tk.RIGHT)
-        position_frame.pack(side=tk.TOP)
+        CaptureResponsesApp.pack_detection_entry(position_label_text, position_dropdown, position_frame)
 
         detection_setup_container.pack(side=tk.TOP)
 
         self.scouter_name_text = scouter_name_text
         self.match_number_text = match_number_text
+        # self.match_type_dropdown_var = match_type_str_var
         self.team_number_text = team_number_text
         self.position_dropdown_var = position_str_var
 
-        if self.held_detection_interaction_frames is None:
-            self.held_detection_interaction_frames = {}
-
-        if self.held_detection_interaction_bindings is None:
-            self.held_detection_interaction_bindings = {}
-
         threshold_copy = cv2.cvtColor(threshold.copy(), cv2.COLOR_GRAY2RGB)
         self.held_detection_threshold = threshold
+
+        if self.update_detection_arg_map is None:
+            self.update_detection_arg_map = {}
+
+        if self.update_detection_rect_map is None:
+            self.update_detection_rect_map = {}
 
         for detection in detections:
             detection.tk_repr(detection_text_container.viewPort)
 
             for bubble, detected in detection.bubbles.items():
-                interaction_frame = tk.Frame(self.responses_image_container)
-                interaction_frame.place(
-                    x=bubble.rect_x, y=bubble.rect_y, width=bubble.rect_w, height=bubble.rect_h, anchor=tk.NW
-                )
-                bound_name = interaction_frame.bind(
-                    CaptureResponsesApp.INTERACTION_BOUND_ACTION,
-                    lambda dtn=detection, b=bubble, dtd=detected: self.update_detection(
-                        detection=dtn, bubble=b, detected=not detected
-                    )
-                )
+                self.update_detection_arg_map[bubble] = (detection, detections, bubble, not detected)
+                self.update_detection_rect_map[bubble] = \
+                    (bubble.rect_x, bubble.rect_y, bubble.rect_x + bubble.rect_w, bubble.rect_y + bubble.rect_h)
 
                 cv2.rectangle(
                     threshold_copy,
@@ -1548,6 +1642,20 @@ class CaptureResponsesApp(CameraApp):
         image_label = tk.Label(self.responses_image_container, image=photo)
         image_label.image = photo  # Keep reference to avoid garbage collection
         image_label.pack(side=tk.TOP)
+
+        # setup bindings for manually updating/toggling detections
+        # must be done *after* image_label is created or else I'd have to bind it to the responses_image_container
+        # which might not always work?
+        def on_image_label_interaction(event: tk.Event):
+            for next_bubble, bounding_rect in self.update_detection_rect_map.items():
+                if pt_inside_rect(*bounding_rect, event.x, event.y):
+                    self.update_detection(*self.update_detection_arg_map[next_bubble])
+
+        interaction_bound_name = image_label.bind(
+            CaptureResponsesApp.INTERACTION_BOUND_ACTION, on_image_label_interaction
+        )
+
+        self.held_detection_interaction_binding = interaction_bound_name
         self.detection_img_label = image_label
 
         confirm_button = tk.Button(self.responses_image_container, text="Confirm", command=self.confirm_preview)
