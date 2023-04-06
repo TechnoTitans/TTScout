@@ -325,7 +325,7 @@ class CameraApp:
                 # and https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
                 approx_polygon: np.ndarray = cv2.approxPolyDP(contour, 0.02 * contour_perimeter, True)
 
-                print(i, len(approx_polygon))
+                # print(i, len(approx_polygon))
 
                 # rects have 4 vertices so if this has 4 points/vertices then we assume we found paper
                 if len(approx_polygon) == 4:
@@ -1190,7 +1190,6 @@ class CaptureResponsesApp(CameraApp):
             else:
                 return cls.PlayoffsFinal
 
-
     # TODO: decide if the MatchType field actually needs to be implemented (mainly just for playoffs scouting)
     class OutputHeaders(enum.Enum):
         Match = "Match #"
@@ -1383,8 +1382,8 @@ class CaptureResponsesApp(CameraApp):
                 #       f"wp: {white_px_prop_above_baseline}, "
                 #       f"mr: {mono_region}")
                 #
-                print(f"{question.name}:{bubble.name}="
-                      f"{meets_all_conditions}")
+                # print(f"{question.name}:{bubble.name}="
+                #       f"{meets_all_conditions}")
 
                 # if meets_all_conditions:
                 #     cv2.rectangle(disp_copy, (rect_x0, rect_y0), (rect_x1, rect_y1), Color.GREEN.rgb)
