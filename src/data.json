@@ -863,8 +863,8 @@
                     "name": "Cone_9",
                     "rect_h": 15,
                     "rect_w": 25,
-                    "rect_x": 575,
-                    "rect_y": 184,
+                    "rect_x": 567,
+                    "rect_y": 183,
                     "select_bubble_button": null
                 }
             ],
@@ -1009,7 +1009,7 @@
                     "rect_w": 19,
                     "rect_x": 174,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1021,7 +1021,7 @@
                     "rect_w": 19,
                     "rect_x": 194,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1033,7 +1033,7 @@
                     "rect_w": 19,
                     "rect_x": 226,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1045,7 +1045,7 @@
                     "rect_w": 19,
                     "rect_x": 246,
                     "rect_y": 227,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1057,7 +1057,7 @@
                     "rect_w": 19,
                     "rect_x": 275,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1069,7 +1069,7 @@
                     "rect_w": 19,
                     "rect_x": 295,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1081,7 +1081,7 @@
                     "rect_w": 19,
                     "rect_x": 322,
                     "rect_y": 227,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1093,7 +1093,7 @@
                     "rect_w": 19,
                     "rect_x": 342,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1105,7 +1105,7 @@
                     "rect_w": 19,
                     "rect_x": 368,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1117,7 +1117,7 @@
                     "rect_w": 19,
                     "rect_x": 388,
                     "rect_y": 227,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1129,7 +1129,7 @@
                     "rect_w": 19,
                     "rect_x": 417,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1141,7 +1141,7 @@
                     "rect_w": 18,
                     "rect_x": 437,
                     "rect_y": 227,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1153,7 +1153,7 @@
                     "rect_w": 19,
                     "rect_x": 463,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1165,7 +1165,7 @@
                     "rect_w": 19,
                     "rect_x": 484,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1177,7 +1177,7 @@
                     "rect_w": 19,
                     "rect_x": 512,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1189,7 +1189,7 @@
                     "rect_w": 19,
                     "rect_x": 532,
                     "rect_y": 227,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1201,7 +1201,7 @@
                     "rect_w": 19,
                     "rect_x": 566,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 },
                 {
                     "bubble_bounding_box": {},
@@ -1213,7 +1213,7 @@
                     "rect_w": 19,
                     "rect_x": 587,
                     "rect_y": 228,
-                    "select_bubble_button": {}
+                    "select_bubble_button": null
                 }
             ],
             "bubbles_frame": {},
@@ -1379,8 +1379,8 @@
                     "name": "Success",
                     "rect_h": 9,
                     "rect_w": 15,
-                    "rect_x": 275,
-                    "rect_y": 413,
+                    "rect_x": 278,
+                    "rect_y": 403,
                     "select_bubble_button": null
                 }
             ],
@@ -1403,8 +1403,8 @@
                     "name": "Success",
                     "rect_h": 10,
                     "rect_w": 15,
-                    "rect_x": 302,
-                    "rect_y": 427,
+                    "rect_x": 304,
+                    "rect_y": 416,
                     "select_bubble_button": null
                 }
             ],
