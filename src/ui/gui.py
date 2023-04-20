@@ -1844,11 +1844,11 @@ tk_window = tk.Tk()
 # app = CameraApp(tk_window)
 # app.update_stream()
 
-# setup = FormSetupApp(tk_window, device=get_capture_device(1))
-# setup.update_stream()
-
-setup = CaptureResponsesApp(tk_window, device=get_capture_device(1))
+setup = FormSetupApp(tk_window, device=get_capture_device(1))
 setup.update_stream()
+#
+# setup = CaptureResponsesApp(tk_window, device=get_capture_device(1))
+# setup.update_stream()
 
 # setup = SelectionMenuApp(tk_window)
 # setup.update_stream()
