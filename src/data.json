@@ -491,8 +491,8 @@
                     "name": "Cone_7",
                     "rect_h": 14,
                     "rect_w": 25,
-                    "rect_x": 475,
-                    "rect_y": 114,
+                    "rect_x": 470,
+                    "rect_y": 116,
                     "select_bubble_button": null
                 },
                 {
@@ -503,8 +503,8 @@
                     "name": "Cube_8",
                     "rect_h": 16,
                     "rect_w": 26,
-                    "rect_x": 524,
-                    "rect_y": 110,
+                    "rect_x": 516,
+                    "rect_y": 112,
                     "select_bubble_button": null
                 },
                 {
@@ -539,8 +539,8 @@
                     "name": "Cube_1",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 168,
-                    "rect_y": 134,
+                    "rect_x": 175,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -551,8 +551,8 @@
                     "name": "Cone_1",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 189,
-                    "rect_y": 134,
+                    "rect_x": 195,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -563,8 +563,8 @@
                     "name": "Cube_2",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 222,
-                    "rect_y": 134,
+                    "rect_x": 226,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -575,7 +575,7 @@
                     "name": "Cone_2",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 243,
+                    "rect_x": 247,
                     "rect_y": 134,
                     "select_bubble_button": null
                 },
@@ -587,7 +587,7 @@
                     "name": "Cube_3",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 272,
+                    "rect_x": 274,
                     "rect_y": 134,
                     "select_bubble_button": null
                 },
@@ -599,8 +599,8 @@
                     "name": "Cone_3",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 293,
-                    "rect_y": 134,
+                    "rect_x": 295,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -611,8 +611,8 @@
                     "name": "Cube_4",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 321,
-                    "rect_y": 134,
+                    "rect_x": 322,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -636,7 +636,7 @@
                     "rect_h": 13,
                     "rect_w": 20,
                     "rect_x": 368,
-                    "rect_y": 134,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -647,8 +647,8 @@
                     "name": "Cone_5",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 389,
-                    "rect_y": 134,
+                    "rect_x": 387,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -659,8 +659,8 @@
                     "name": "Cube_6",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 418,
-                    "rect_y": 134,
+                    "rect_x": 416,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -671,8 +671,8 @@
                     "name": "Cone_6",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 439,
-                    "rect_y": 134,
+                    "rect_x": 435,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -683,8 +683,8 @@
                     "name": "Cube_7",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 467,
-                    "rect_y": 134,
+                    "rect_x": 463,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -695,8 +695,8 @@
                     "name": "Cone_7",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 488,
-                    "rect_y": 134,
+                    "rect_x": 483,
+                    "rect_y": 135,
                     "select_bubble_button": null
                 },
                 {
@@ -707,7 +707,7 @@
                     "name": "Cube_8",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 517,
+                    "rect_x": 511,
                     "rect_y": 134,
                     "select_bubble_button": null
                 },
@@ -719,7 +719,7 @@
                     "name": "Cone_8",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 538,
+                    "rect_x": 531,
                     "rect_y": 134,
                     "select_bubble_button": null
                 },
@@ -731,7 +731,7 @@
                     "name": "Cube_9",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 573,
+                    "rect_x": 566,
                     "rect_y": 134,
                     "select_bubble_button": null
                 },
@@ -743,7 +743,7 @@
                     "name": "Cone_9",
                     "rect_h": 13,
                     "rect_w": 20,
-                    "rect_x": 594,
+                    "rect_x": 586,
                     "rect_y": 134,
                     "select_bubble_button": null
                 }
@@ -815,7 +815,7 @@
                     "name": "Cube_5",
                     "rect_h": 16,
                     "rect_w": 26,
-                    "rect_x": 374,
+                    "rect_x": 373,
                     "rect_y": 180,
                     "select_bubble_button": null
                 },
@@ -827,8 +827,8 @@
                     "name": "Cone_6",
                     "rect_h": 15,
                     "rect_w": 23,
-                    "rect_x": 426,
-                    "rect_y": 184,
+                    "rect_x": 421,
+                    "rect_y": 182,
                     "select_bubble_button": null
                 },
                 {
@@ -839,8 +839,8 @@
                     "name": "Cone_7",
                     "rect_h": 16,
                     "rect_w": 27,
-                    "rect_x": 474,
-                    "rect_y": 184,
+                    "rect_x": 468,
+                    "rect_y": 183,
                     "select_bubble_button": null
                 },
                 {
@@ -851,8 +851,8 @@
                     "name": "Cube_8",
                     "rect_h": 16,
                     "rect_w": 27,
-                    "rect_x": 523,
-                    "rect_y": 180,
+                    "rect_x": 515,
+                    "rect_y": 178,
                     "select_bubble_button": null
                 },
                 {
@@ -959,7 +959,7 @@
                     "name": "Cone_7",
                     "rect_h": 14,
                     "rect_w": 24,
-                    "rect_x": 471,
+                    "rect_x": 468,
                     "rect_y": 208,
                     "select_bubble_button": null
                 },
@@ -971,7 +971,7 @@
                     "name": "Cube_8",
                     "rect_h": 15,
                     "rect_w": 26,
-                    "rect_x": 518,
+                    "rect_x": 515,
                     "rect_y": 205,
                     "select_bubble_button": null
                 },
@@ -1308,7 +1308,7 @@
                     "rect_h": 11,
                     "rect_w": 18,
                     "rect_x": 359,
-                    "rect_y": 304,
+                    "rect_y": 298,
                     "select_bubble_button": null
                 }
             ],
@@ -1534,6 +1534,102 @@
             "edit_button": {},
             "is_tk": true,
             "name": "AutoDNACharge",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Blue",
+                    "rect_h": 9,
+                    "rect_w": 20,
+                    "rect_x": 450,
+                    "rect_y": 37,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Red",
+                    "rect_h": 9,
+                    "rect_w": 20,
+                    "rect_x": 429,
+                    "rect_y": 37,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "1",
+                    "rect_h": 9,
+                    "rect_w": 20,
+                    "rect_x": 480,
+                    "rect_y": 37,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "2",
+                    "rect_h": 9,
+                    "rect_w": 20,
+                    "rect_x": 501,
+                    "rect_y": 37,
+                    "select_bubble_button": null
+                },
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "3",
+                    "rect_h": 9,
+                    "rect_w": 20,
+                    "rect_x": 522,
+                    "rect_y": 38,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
+            "name": "InfoPosition",
+            "question_frame": {},
+            "question_name": {}
+        },
+        {
+            "bubbles": [
+                {
+                    "bubble_bounding_box": {},
+                    "bubble_frame": {},
+                    "bubble_name": {},
+                    "is_tk": true,
+                    "name": "Success",
+                    "rect_h": 12,
+                    "rect_w": 18,
+                    "rect_x": 122,
+                    "rect_y": 144,
+                    "select_bubble_button": null
+                }
+            ],
+            "bubbles_frame": {},
+            "buttons_frame": {},
+            "delete_button": {},
+            "edit_button": {},
+            "is_tk": true,
+            "name": "AutoMissedPieces",
             "question_frame": {},
             "question_name": {}
         }
