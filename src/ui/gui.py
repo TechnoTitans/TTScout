@@ -7,7 +7,6 @@ import math
 import json
 import tkinter as tk
 import warnings
-import atexit
 import threading
 import enum
 import os.path
@@ -21,9 +20,9 @@ from PIL import Image, ImageTk
 from pupil_apriltags import Detector
 from scipy import ndimage as ndi
 
-from util import four_point_transform, Color, rotate_image, filter_out_shadows
-from scroll_frame import ScrollFrame
-from canvas import Canvas
+from .util import four_point_transform, Color, rotate_image, filter_out_shadows
+from .scroll_frame import ScrollFrame
+from .canvas import Canvas
 
 
 def get_capture_device(source: int, suppress_warn=False):
@@ -37,6 +36,8 @@ def get_capture_device(source: int, suppress_warn=False):
     # device.set(3, device.get(cv2.CAP_PROP_FRAME_WIDTH))
     # device.set(4, device.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+    # TODO: why was the above commented out in favor for this again?
+    #  tbf, it was probably cause it didn't work
     device.set(3, 1280)
     device.set(4, 720)
 
@@ -354,9 +355,9 @@ class CameraApp:
 
         # TODO: make like all of this better
         # this is all like unused as of right now
-        ret, threshold = cv2.threshold(
-            equalized_img, np.median(equalized_img), 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
-        )
+        # ret, threshold = cv2.threshold(
+        #     equalized_img, np.median(equalized_img), 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
+        # )
 
         blurred = cv2.GaussianBlur(equalized_img, (3, 3), 0)
         edged = cv2.Canny(blurred, 50, 150)
@@ -452,7 +453,10 @@ class CameraApp:
 
 
 class FormSetupApp(CameraApp):
-    JSON_PATH = "../data.json"
+    # TODO: this is currently only valid when launched from main.py,
+    #  where data.json is in the same level as main.py, when launched directly
+    #  from gui.py, data.json will be 1 level up
+    JSON_PATH = "data.json"
 
     PREVIEW_TARGET_FPS = 30
     _PREVIEW_TARGET_SPF = 1 / PREVIEW_TARGET_FPS
@@ -1681,6 +1685,7 @@ class CaptureResponsesApp(CameraApp):
     def retry_preview(self):
         self.close_displayed_detection()
 
+    # noinspection PyUnusedLocal
     def process_detection_results(self,
                                   threshold: np.ndarray,
                                   raw: np.ndarray,
@@ -1840,20 +1845,47 @@ class SelectionMenuApp:
             pass
 
 
-tk_window = tk.Tk()
+MODES = ["CameraApp", "FormSetupApp", "CaptureResponsesApp", "SelectionMenuApp"]
+
+
+def launchCameraApp(tk_window: tk.Tk) -> CameraApp:
+    app = CameraApp(tk_window)
+    app.update_stream()
+    return app
+
+
+def launchFormSetupApp(tk_window: tk.Tk) -> FormSetupApp:
+    app = FormSetupApp(tk_window)
+    app.update_stream()
+    return app
+
+
+def launchCaptureResponsesApp(tk_window: tk.Tk, device: cv2.VideoCapture) -> CaptureResponsesApp:
+    app = CaptureResponsesApp(tk_window, device=device)
+    app.update_stream()
+    return app
+
+
+def launchSelectionMenuApp(tk_window: tk.Tk) -> SelectionMenuApp:
+    app = SelectionMenuApp(tk_window)
+    app.update_stream()
+    return app
+
+
+# tk_window = tk.Tk()
 # app = CameraApp(tk_window)
 # app.update_stream()
 
 # setup = FormSetupApp(tk_window)
 # setup.update_stream()
 
-setup = CaptureResponsesApp(tk_window, device=get_capture_device(1))
-setup.update_stream()
+# setup = CaptureResponsesApp(tk_window, device=get_capture_device(1))
+# setup.update_stream()
 
 # setup = SelectionMenuApp(tk_window)
 # setup.update_stream()
 
-tk_window.mainloop()
+# tk_window.mainloop()
 
 # Make sure to close the camera stream when we exit
-atexit.register(setup.close)
+# atexit.register(setup.close)

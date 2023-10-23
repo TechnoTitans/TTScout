@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import argparse
+from typing import Any
+
 from PIL import Image
 
 
@@ -14,7 +15,6 @@ def dir_path(file_path):
         raise argparse.ArgumentTypeError(f'Supplied argument "{file_path}" is not a valid file path.')
 
 
-parser = argparse.ArgumentParser()
 parser = argparse.ArgumentParser(
     description='A script to convert pre-generated apriltag .png files into SVG format.',
     epilog='Example: "python tag_to_svg.py tagStandard52h13/tag52_13_00007.png tag52_13_00007.svg --size=20mm"'
@@ -46,16 +46,17 @@ def gen_apriltag_svg(width, height, pixel_array, size):
         _a = _raw_a / 255
         return f'rgba({_r}, {_g}, {_b}, {_a})'
 
-    def gen_gridsquare(row_num, col_num, pixel):
+    def gen_grid_square(row_num, col_num, pixel):
         _rgba = gen_rgba(pixel)
         _id = f'box{row_num}-{col_num}'
         return f'\t<rect width="1" height="1" x="{row_num}" y="{col_num}" fill="{_rgba}" id="{_id}"/>\n'
 
     svg_text = '<?xml version="1.0" standalone="yes"?>\n'
-    svg_text += f'<svg width="{size}" height="{size}" viewBox="0,0,{width},{height}" xmlns="http://www.w3.org/2000/svg">\n'
+    svg_text += f'<svg width="{size}" height="{size}" viewBox="0,0,{width},{height}" xmlns="http://www.w3.org/2000' \
+                f'/svg">\n'
     for _y in range(height):
         for _x in range(width):
-            svg_text += gen_gridsquare(_x, _y, pixel_array[_x, _y])
+            svg_text += gen_grid_square(_x, _y, pixel_array[_x, _y])
     svg_text += '</svg>\n'
 
     return svg_text
@@ -68,11 +69,9 @@ def main():
     svg_size = args.svg_size
     # tag_margin = args.tag_margin #TODO no support for margin yet
 
-    apriltag_svg = None
-
     with Image.open(tag_file, 'r') as im:
         width, height = im.size
-        pix_vals = im.load()
+        pix_vals: Any = im.load()
 
         apriltag_svg = gen_apriltag_svg(width, height, pix_vals, svg_size)
 

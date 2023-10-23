@@ -1,5 +1,4 @@
 import enum
-import threading
 
 from scipy.spatial import distance as dist
 import numpy as np
@@ -128,7 +127,7 @@ def rotate_image(mat: np.ndarray, angle: float):
     bound_w = int(height * abs_sin + width * abs_cos)
     bound_h = int(height * abs_cos + width * abs_sin)
 
-    # subtract old image center (bringing image back to origo) and adding the new image center coordinates
+    # subtract old image center (bringing image back to origin) and adding the new image center coordinates
     rotation_mat[0, 2] += bound_w / 2 - image_center[0]
     rotation_mat[1, 2] += bound_h / 2 - image_center[1]
 

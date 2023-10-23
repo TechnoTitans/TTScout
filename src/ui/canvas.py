@@ -1,7 +1,7 @@
 import tkinter as tk
 import enum
 
-from util import Color
+from .util import Color
 
 
 class Canvas(tk.Canvas):
