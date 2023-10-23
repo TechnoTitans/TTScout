@@ -886,7 +886,7 @@ class FormSetupApp(CameraApp):
 
         self.snapshot_frame = None
         # self.img_window([Image.fromarray(self.setup_frame)], dims=(640, 480))
-        self.make_setup_window(Image.fromarray(self.setup_image), dims=CameraApp.PROCESSING_DIM)
+        self.make_setup_window(Image.fromarray(self.setup_image), dims=(320, 240))
 
     def close_setup_window(self):
         self.setup_window.withdraw()
@@ -1876,7 +1876,7 @@ def launchSelectionMenuApp(tk_window: tk.Tk) -> SelectionMenuApp:
 # app = CameraApp(tk_window)
 # app.update_stream()
 
-# setup = FormSetupApp(tk_window)
+# setup = FormSetupApp(tk_window, device=get_capture_device(1))
 # setup.update_stream()
 
 # setup = CaptureResponsesApp(tk_window, device=get_capture_device(1))
